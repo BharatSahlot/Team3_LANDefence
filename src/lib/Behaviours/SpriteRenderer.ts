@@ -8,6 +8,8 @@ export class SpriteRenderer extends Behaviour {
 
     private transform: Transform;
 
+    public anims: Phaser.Animations.AnimationState | null;
+
     constructor(object: SceneObject, img: string) {
         super(object);
 
@@ -24,6 +26,11 @@ export class SpriteRenderer extends Behaviour {
         this.transform = transform;
 
         this.sprite = this.object.getScene().add.sprite(transform.position.x, transform.position.y, this.imgTag);
+        this.sprite.setScale(this.transform.scale.x, this.transform.scale.y);
+        this.sprite.setRotation(this.transform.rotation);
+        this.sprite.setDepth(100);
+
+        this.anims = this.sprite.anims;
     }
 
     // do after other components are done updating transform

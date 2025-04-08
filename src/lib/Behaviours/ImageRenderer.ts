@@ -23,11 +23,8 @@ export class ImageRenderer extends Behaviour {
 
         this.transform = transform;
 
-        console.log("creating image on position: " + transform.position.x + ", " + transform.position.y);
         this.image = this.object.getScene().add.image(transform.position.x, transform.position.y, this.imgTag);
-
-        console.log("scale: " + transform.scale.x + ", " + transform.scale.y);
-        // this.image.setScale(this.transform.scale.x, this.transform.scale.y);
+        this.image.setScale(this.transform.scale.x, this.transform.scale.y);
         this.image.setRotation(this.transform.rotation);
         this.image.setDepth(100);
     }

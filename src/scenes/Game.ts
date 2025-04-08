@@ -1,11 +1,11 @@
 import { Scene } from 'phaser';
-import { SceneObject } from '../lib/SceneObject';
-import { Transform } from '../lib/Behaviours/Transform';
-import { SpriteRenderer } from '../lib/Behaviours/SpriteRenderer';
-import { ImageRenderer } from '../lib/Behaviours/ImageRenderer';
+import { setupPlayerAnimations } from './Game/setupPlayerAnimations';
+import { Player } from '../lib/Actors/Player';
 
 export class Game extends Scene
 {
+    private setupPlayerAnimations: (this: Game) => void;
+
     constructor ()
     {
         super('Game');
@@ -14,43 +14,26 @@ export class Game extends Scene
     preload ()
     {
         this.load.setPath('assets');
-        
-        this.load.image('background', 'bg.png');
-        this.load.image('logo', 'logo.png');
+
+        this.load.spritesheet('gold-knight', './NinjaPack/Actor/Characters/KnightGold/SpriteSheet.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
+        this.setupPlayerAnimations = setupPlayerAnimations;
     }
 
     create ()
     {
-        // this.add.image(512, 384, 'background');
+        this.setupPlayerAnimations();
 
-        let obj = new SceneObject(this);
-        let transform = new Transform(obj);
-        transform.position = new Phaser.Math.Vector2(512, 350);
-        obj.addBehaviour(transform);
+        let player = new Player(this);
+        player.onStart();
 
-        obj.addBehaviour(new ImageRenderer(obj, 'logo'));
-
-        obj.onStart();
-
-        // this.add.image(512, 350, 'logo').setDepth(100);
-        // this.add.text(512, 490, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-        //     fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-        //     stroke: '#000000', strokeThickness: 8,
-        //     align: 'center'
-        // }).setOrigin(0.5).setDepth(100);
-        
-
-        let dir = 1;
         setInterval(() => {
-            obj.onTick();
+            player.onTick();
 
-            transform.position.x += 5 * dir;
-            if(transform.position.x >= 700) dir = -1;
-            else if(transform.position.x <= 300) dir = 1;
-
-            transform.scale = new Phaser.Math.Vector2(transform.position.x / 500, transform.position.x / 500);
-
-            obj.onLateTick();
+            player.onLateTick();
         }, 20);
     }
 }
