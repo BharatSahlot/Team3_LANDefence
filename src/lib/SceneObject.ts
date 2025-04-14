@@ -1,15 +1,16 @@
 import { Scene } from "phaser";
 import { Behaviour } from "./Behaviour";
+import { BaseScene } from "./BaseScene";
 
 export class SceneObject {
-    protected scene: Scene;
+    protected scene: BaseScene;
 
     private behaviours: Behaviour[];
     private newBehaviours: Behaviour[];
 
     protected id: string = this.randomString(24);
 
-    constructor(scene: Scene) {
+    constructor(scene: BaseScene) {
         this.scene = scene;
         this.behaviours = [];
         this.newBehaviours = [];
@@ -32,7 +33,7 @@ export class SceneObject {
         this.id = id;
     }
 
-    public getScene(): Scene { return this.scene; }
+    public getScene(): BaseScene { return this.scene; }
 
     public addBehaviour<T extends Behaviour>(b: T): void {
         this.newBehaviours = [...this.newBehaviours, b];

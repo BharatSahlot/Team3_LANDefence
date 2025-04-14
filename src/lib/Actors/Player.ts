@@ -1,4 +1,3 @@
-import { Scene } from "phaser";
 import { SceneObject } from "../SceneObject";
 import { Transform } from "../Behaviours/Transform";
 import { SpriteRenderer } from "../Behaviours/SpriteRenderer";
@@ -7,6 +6,7 @@ import { InputManager } from "../../controls/InputManager";
 import { ISerializable } from "../ISerializable";
 import { netMan } from "../NetworkManager";
 import { gameEvents } from "../GameEvents";
+import { BaseScene } from "../BaseScene";
 
 export class Player extends SceneObject implements ISerializable {
     public speed: number = 5;
@@ -16,13 +16,12 @@ export class Player extends SceneObject implements ISerializable {
     private sprite: SpriteRenderer;
 
     private currentSpeed: Phaser.Math.Vector2;
-    private inputManager: InputManager
     private isNetworkControlled: boolean = false;
 
     private position: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0);
 
     public peerId: string;
-    constructor(scene: Scene, isNetworkControlled: boolean = false) {
+    constructor(scene: BaseScene, isNetworkControlled: boolean = false) {
         super(scene);
         
         this.isNetworkControlled = isNetworkControlled;
@@ -57,17 +56,11 @@ export class Player extends SceneObject implements ISerializable {
 
     public onStart(): void {
         this.currentSpeed = new Phaser.Math.Vector2(0, 0);
-
-        if(this.peerId == netMan.getPeerId()) 
-        {
-            this.inputManager = new InputManager(this.scene);
-        }
-
         super.onStart();
     }
 
     public onTick(): void {
-        this.currentSpeed = this.inputManager?.movement.clone();
+        this.currentSpeed = this.scene.inputManager?.movement.clone();
 
         if(!this.isNetworkControlled) {
             this.transform.position.x += this.currentSpeed.x * this.speed;
