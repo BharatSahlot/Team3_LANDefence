@@ -7,6 +7,7 @@ import { ISerializable } from "../ISerializable";
 import { netMan } from "../NetworkManager";
 import { gameEvents } from "../GameEvents";
 import { BaseScene } from "../BaseScene";
+import { CameraController } from "../Behaviours/CameraController";
 
 export class Player extends SceneObject implements ISerializable {
     public speed: number = 0.3;
@@ -28,8 +29,8 @@ export class Player extends SceneObject implements ISerializable {
 
         this.transform = new Transform(this);
         this.transform.position = new Phaser.Math.Vector2(
-            Phaser.Math.Between(400, 600),
-            Phaser.Math.Between(200, 400)
+            Phaser.Math.Between(-250, 250),
+            Phaser.Math.Between(-250, 250)
         );
         this.position = this.transform.position;
         this.transform.scale = new Phaser.Math.Vector2(2, 2);
@@ -57,6 +58,11 @@ export class Player extends SceneObject implements ISerializable {
     public onStart(): void {
         this.currentSpeed = new Phaser.Math.Vector2(0, 0);
         super.onStart();
+
+        if(this.peerId == netMan.getPeerId())
+        {
+            this.addBehaviour(new CameraController(this));
+        }
     }
 
     public onTick(delta: number): void {

@@ -149,7 +149,7 @@ export class Game extends BaseScene
         const tileset = map.addTilesetImage('TilesetFloor', 'tiles', 16, 16, 0, 0);
 
         if(tileset) {
-            const layer = map.createLayer('Tile Layer 1', tileset, 0, 0);
+            const layer = map.createLayer('Tile Layer 1', tileset, -1400, -1400);
             layer?.setScale(3);
         }
     }
