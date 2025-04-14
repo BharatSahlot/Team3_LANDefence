@@ -7,7 +7,9 @@ export class BaseScene extends Scene
 
     constructor(name: string) {
         super(name);
+    }
 
+    create() {
         this.inputManager = new InputManager(this);
     }
 }

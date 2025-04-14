@@ -9,7 +9,7 @@ import { gameEvents } from "../GameEvents";
 import { BaseScene } from "../BaseScene";
 
 export class Player extends SceneObject implements ISerializable {
-    public speed: number = 5;
+    public speed: number = 0.3;
 
     public transform: Transform;
     
@@ -59,15 +59,15 @@ export class Player extends SceneObject implements ISerializable {
         super.onStart();
     }
 
-    public onTick(): void {
+    public onTick(delta: number): void {
         this.currentSpeed = this.scene.inputManager?.movement.clone();
 
         if(!this.isNetworkControlled) {
-            this.transform.position.x += this.currentSpeed.x * this.speed;
-            this.transform.position.y += this.currentSpeed.y * this.speed;
+            this.transform.position.x += this.currentSpeed.x * this.speed * delta;
+            this.transform.position.y += this.currentSpeed.y * this.speed * delta;
         } else if(netMan.getPeerId() == this.peerId) {
-            this.position.x += this.currentSpeed.x * this.speed;
-            this.position.y += this.currentSpeed.y * this.speed;
+            this.position.x += this.currentSpeed.x * this.speed * delta;
+            this.position.y += this.currentSpeed.y * this.speed * delta;
 
             let x = this.position.x;
             let y = this.position.y;
@@ -75,6 +75,6 @@ export class Player extends SceneObject implements ISerializable {
             if(x != 0 || y != 0) gameEvents.emit('player-move', { x, y });
         }
 
-        super.onTick();
+        super.onTick(delta);
     }
 }

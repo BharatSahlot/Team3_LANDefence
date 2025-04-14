@@ -40,6 +40,8 @@ export class Game extends BaseScene
 
     create ()
     {
+        super.create();
+
         this.setupPlayerAnimations();
 
         if(netMan.isHosting()) {
@@ -80,8 +82,6 @@ export class Game extends BaseScene
             });
 
             gameEvents.on('player-move', (data: any, peerId: string) => {
-                console.log('player-move');
-
                 let player = this.players.get(peerId);
                 if(!player) return;
 
@@ -129,11 +129,11 @@ export class Game extends BaseScene
                 }
             });
         }
+    }
 
-        setInterval(() => {
-            this.objects.forEach(obj => obj.onTick());
+    override update(time: number, delta: number) {
+        this.objects.forEach(obj => obj.onTick(delta));
 
-            this.objects.forEach(obj => obj.onLateTick());
-        }, 20);
+        this.objects.forEach(obj => obj.onLateTick());
     }
 }
