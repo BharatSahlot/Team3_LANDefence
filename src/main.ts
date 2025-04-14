@@ -1,5 +1,8 @@
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale,Types } from 'phaser';
+import { MainMenu } from './scenes/MainMenu';
+import { HostGame } from './scenes/HostGame';
+import { JoinGame } from './scenes/JoinGame';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -15,6 +18,9 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        MainMenu,
+        HostGame,
+        JoinGame,
         MainGame
     ]
 };

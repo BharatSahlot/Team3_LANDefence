@@ -1,6 +1,8 @@
 import { Scene } from 'phaser';
 import { setupPlayerAnimations } from './Game/setupPlayerAnimations';
 import { Player } from '../lib/Actors/Player';
+import { netMan } from '../lib/NetworkManager';
+import { gameEvents } from '../lib/GameEvents';
 
 export class Game extends Scene
 {
@@ -21,19 +23,24 @@ export class Game extends Scene
         });
 
         this.setupPlayerAnimations = setupPlayerAnimations;
+
+        if(netMan.isHosting())
+        {
+            gameEvents.emit('start-game', {});
+        }
     }
 
     create ()
     {
         this.setupPlayerAnimations();
 
-        let player = new Player(this);
-        player.onStart();
-
-        setInterval(() => {
-            player.onTick();
-
-            player.onLateTick();
-        }, 20);
+        // let player = new Player(this);
+        // player.onStart();
+        //
+        // setInterval(() => {
+        //     player.onTick();
+        //
+        //     player.onLateTick();
+        // }, 20);
     }
 }
