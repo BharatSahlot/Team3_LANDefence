@@ -1,3 +1,7 @@
 export interface IControls {
-    getDirection(): Phaser.Math.Vector2;
-}
+    getMovement(): Phaser.Math.Vector2;
+    getPointerPosition(): Phaser.Math.Vector2;
+    getPointerAim(): Phaser.Math.Vector2;
+    isUseItemPressed(): boolean;
+    getSelectedItemIndex(): number;
+  }

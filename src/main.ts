@@ -22,7 +22,12 @@ const config: Types.Core.GameConfig = {
         HostGame,
         JoinGame,
         MainGame
-    ]
+    ],
+    input: {
+        gamepad: true,
+        keyboard: true,
+        mouse: true,
+    },
 };
 
 export default new Game(config);

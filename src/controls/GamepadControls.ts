@@ -1,44 +1,51 @@
-// /controls/GamepadControls.ts
-import Phaser from "phaser";
 import { IControls } from "./IControls";
-
+import Phaser from "phaser";
 export class GamepadControls implements IControls {
-  private scene: Phaser.Scene;
+  private gamepad: Phaser.Input.Gamepad.Gamepad | null;
 
   constructor(scene: Phaser.Scene) {
-    this.scene = scene;
+    this.gamepad = scene.input.gamepad?.gamepads[0] || null;
   }
 
-  public getDirection(): Phaser.Math.Vector2 {
-    // Create a zero vector to return in case no gamepad is connected.
-    const direction = new Phaser.Math.Vector2(0, 0);
-
-    // Ensure the gamepad plugin is available.
-    if (!this.scene.input.gamepad) {
-      return direction;
+  getMovement(): Phaser.Math.Vector2 {
+    if (this.gamepad) {
+      const leftStick = this.gamepad.leftStick;
+      return new Phaser.Math.Vector2(leftStick.x, leftStick.y);
     }
+    return new Phaser.Math.Vector2();
+  }
 
-    // Retrieve the first connected gamepad.
-    const pad = this.scene.input.gamepad.getPad(0);
-    if (!pad) {
-      return direction;
+  getPointerPosition(): Phaser.Math.Vector2 {
+    if (this.gamepad) {
+      const rightStick = this.gamepad.rightStick;
+      return new Phaser.Math.Vector2(rightStick.x, rightStick.y); // Right stick for aiming
     }
+    return new Phaser.Math.Vector2();
+  }
 
-    // Retrieve the left analog stick values.
-    // Typically, axes[0] is the horizontal axis and axes[1] is the vertical axis.
-    const x = pad.axes.length > 0 ? pad.axes[0].getValue() : 0;
-    const y = pad.axes.length > 1 ? pad.axes[1].getValue() : 0;
-
-    direction.set(x, y);
-
-    // Optionally, apply a deadzone threshold to avoid drift.
-    const DEADZONE = 0.2;
-    if (direction.length() < DEADZONE) {
-      direction.set(0, 0);
-    } else {
-      direction.normalize();
+  getPointerAim(): Phaser.Math.Vector2 {
+    if (this.gamepad) {
+      const rightStick = this.gamepad.rightStick;
+      return new Phaser.Math.Vector2(rightStick.x, rightStick.y); // Right stick for aiming
     }
+    return new Phaser.Math.Vector2();
+  }
 
-    return direction;
+  isUseItemPressed(): boolean {
+    if (this.gamepad) {
+      return this.gamepad.A; // A button for using item
+    }
+    return false;
+  }
+
+  getSelectedItemIndex(): number {
+    if (this.gamepad) {
+      // Example: Use DPad for selection
+      if (this.gamepad.pad.left) return 0;
+      if (this.gamepad.pad.right) return 1;
+      if (this.gamepad.pad.up) return 2;
+      if (this.gamepad.pad.down) return 3;
+    }
+    return -1;
   }
 }
