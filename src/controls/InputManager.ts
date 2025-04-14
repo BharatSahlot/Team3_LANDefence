@@ -1,16 +1,13 @@
-import { IControls } from "./IControls";
 import { KeyboardControls } from "./KeyboardControls";
 import { GamepadControls } from "./GamepadControls";
 import Phaser from "phaser";
 
 export class InputManager {
-    private scene: Phaser.Scene;
     private keyboardControls: KeyboardControls;
     private gamepadControls: GamepadControls | null = null;
 
     // Constructor initializes both keyboard and gamepad controls
     constructor(scene: Phaser.Scene) {
-        this.scene = scene;
         this.keyboardControls = new KeyboardControls(scene);
 
         // Listen for gamepad connection and disconnection

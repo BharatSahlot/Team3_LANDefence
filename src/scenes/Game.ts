@@ -1,14 +1,13 @@
-import { Scene } from 'phaser';
 import { setupPlayerAnimations } from './Game/setupPlayerAnimations';
 import { Player } from '../lib/Actors/Player';
 import { netMan } from '../lib/NetworkManager';
 import { gameEvents } from '../lib/GameEvents';
-import { InputManager } from '../controls/InputManager';
 import { Transform } from '../lib/Behaviours/Transform';
 import { ISerializable } from '../lib/ISerializable';
 import { SceneObject } from '../lib/SceneObject';
+import { BaseScene } from '../lib/BaseScene';
 
-export class Game extends Scene
+export class Game extends BaseScene
 {
     private setupPlayerAnimations: (this: Game) => void;
     private objectsStates: Map<string, ISerializable> = new Map<string, any>();
@@ -104,7 +103,6 @@ export class Game extends Scene
                             let player = new Player(this, true);
                             player.setId(id);
 
-                            // console.log(data[id].data);
                             player.deserialize(data[id].data);
 
                             this.transforms.set(player.getId(), player.transform);
