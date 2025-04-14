@@ -30,6 +30,9 @@ export class Game extends BaseScene
             frameHeight: 16
         });
 
+        this.load.image('tiles', './NinjaPack/Backgrounds/Tilesets/TilesetFloor.png');
+        this.load.tilemapTiledJSON('map', './floor.tmj');
+
         this.setupPlayerAnimations = setupPlayerAnimations;
 
         if(netMan.isHosting())
@@ -43,6 +46,8 @@ export class Game extends BaseScene
         super.create();
 
         this.setupPlayerAnimations();
+
+        this.loadTilemap();
 
         if(netMan.isHosting()) {
             setInterval(() => {
@@ -135,5 +140,17 @@ export class Game extends BaseScene
         this.objects.forEach(obj => obj.onTick(delta));
 
         this.objects.forEach(obj => obj.onLateTick());
+    }
+
+    private loadTilemap()
+    {
+        const map = this.make.tilemap({ key: 'map' });
+
+        const tileset = map.addTilesetImage('TilesetFloor', 'tiles', 16, 16, 0, 0);
+
+        if(tileset) {
+            const layer = map.createLayer('Tile Layer 1', tileset, 0, 0);
+            layer?.setScale(3);
+        }
     }
 }
