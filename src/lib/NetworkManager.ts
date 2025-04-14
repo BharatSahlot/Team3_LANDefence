@@ -27,7 +27,7 @@ export class NetworkManager {
         return new Promise((resolve, reject) => {
             this.isHost = true;
             this.peer = new Peer(this.randomString(4), {
-                host: "localhost",
+                host: "192.168.1.163",
                 port: 9000
             });
 
@@ -70,7 +70,7 @@ export class NetworkManager {
     public async join(hostId: string): Promise<void> {
         this.isHost = false;
         this.peer = new Peer(this.randomString(4), {
-            host: "localhost",
+            host: "192.168.1.163",
             port: 9000
         });
 

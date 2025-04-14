@@ -7,10 +7,29 @@ export class SceneObject {
     private behaviours: Behaviour[];
     private newBehaviours: Behaviour[];
 
+    protected id: string = this.randomString(24);
+
     constructor(scene: Scene) {
         this.scene = scene;
         this.behaviours = [];
         this.newBehaviours = [];
+    }
+
+    private randomString(length: number = 4): string {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    public getId() {
+        return this.id;
+    }
+
+    public setId(id: string) {
+        this.id = id;
     }
 
     public getScene(): Scene { return this.scene; }

@@ -2,8 +2,10 @@ import { Scene } from "phaser";
 import { SceneObject } from "../SceneObject";
 import { Transform } from "../Behaviours/Transform";
 import { SpriteRenderer } from "../Behaviours/SpriteRenderer";
+import { ISerializable } from "../ISerializable";
+import { netMan } from "../NetworkManager";
 
-export class Player extends SceneObject {
+export class Player extends SceneObject implements ISerializable {
     public speed: number = 5;
 
     public transform: Transform;
@@ -36,6 +38,20 @@ export class Player extends SceneObject {
         this.upKey = scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
     }
 
+    getType(): string {
+        return 'Player';
+    }
+
+    public serialize(): any {
+        return {
+            enabled: true,
+        };
+    }
+
+    public deserialize(data: string): void {
+
+    }
+
     public onStart(): void {
         this.currentSpeed = new Phaser.Math.Vector2(0, 0);
 
@@ -43,6 +59,7 @@ export class Player extends SceneObject {
     }
 
     public onTick(): void {
+        if(!netMan.isHosting()) return;
 
         this.currentSpeed.x = this.currentSpeed.y = 0;
 
