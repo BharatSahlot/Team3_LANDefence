@@ -15,6 +15,7 @@ export class Game extends Scene
     private transforms: Map<string, Transform> = new Map<string, Transform>();
 
     private objects: SceneObject[] = [];
+    private players: Map<string, Player> = new Map<string, Player>();
 
     constructor ()
     {
@@ -66,11 +67,28 @@ export class Game extends Scene
                 gameEvents.emit("transform-update", state);
             }, 5);
 
-            let player = new Player(this);
-            player.onStart();
-            this.transforms.set(player.getId(), player.transform);
-            this.objectsStates.set(player.getId(), player);
-            this.objects.push(player);
+            netMan.getPlayerList().forEach(playerId => {
+                let player = new Player(this, playerId != netMan.getPeerId());
+                player.onStart();
+
+                player.peerId = playerId;
+                this.transforms.set(player.getId(), player.transform);
+
+                this.players.set(playerId, player);
+                this.objectsStates.set(player.getId(), player);
+                this.objects.push(player);
+            });
+
+            gameEvents.on('player-move', (data: any, peerId: string) => {
+                console.log('player-move');
+
+                let player = this.players.get(peerId);
+                if(!player) return;
+
+                player.transform.position.x = data.x;
+                player.transform.position.y = data.y;
+            });
+
         } else {
             // peer side
             gameEvents.on('state-update', (data: any, _) => {
@@ -82,11 +100,15 @@ export class Game extends Scene
                         if(obj) obj.deserialize(data[id].data);
                     } else {
                         if(data[id].type == 'Player') {
-                            let player = new Player(this);
+                            let player = new Player(this, true);
                             player.setId(id);
                             player.onStart();
 
+                            // console.log(data[id].data);
+                            player.deserialize(data[id].data);
+
                             this.transforms.set(player.getId(), player.transform);
+                            this.players.set(player.peerId, player);
                             this.objectsStates.set(player.getId(), player);
 
                             this.objects.push(player);

@@ -4,6 +4,7 @@ import { Transform } from "../Behaviours/Transform";
 import { SpriteRenderer } from "../Behaviours/SpriteRenderer";
 import { ISerializable } from "../ISerializable";
 import { netMan } from "../NetworkManager";
+import { gameEvents } from "../GameEvents";
 
 export class Player extends SceneObject implements ISerializable {
     public speed: number = 5;
@@ -20,12 +21,23 @@ export class Player extends SceneObject implements ISerializable {
     private readonly upKey: Phaser.Input.Keyboard.Key | undefined;
 
     private currentAnim: string = "idle";
+    private isNetworkControlled: boolean = false;
+
+    private position: Phaser.Math.Vector2;
+
+    public peerId: string;
     
-    constructor(scene: Scene) {
+    constructor(scene: Scene, isNetworkControlled: boolean = false) {
         super(scene);
+        
+        this.isNetworkControlled = isNetworkControlled;
 
         this.transform = new Transform(this);
-        this.transform.position = new Phaser.Math.Vector2(64, 112);
+        this.transform.position = new Phaser.Math.Vector2(
+            Phaser.Math.Between(400, 600),
+            Phaser.Math.Between(200, 400)
+        );
+        this.position = this.transform.position;
         this.transform.scale = new Phaser.Math.Vector2(2, 2);
         this.addBehaviour(this.transform);
 
@@ -44,12 +56,13 @@ export class Player extends SceneObject implements ISerializable {
 
     public serialize(): any {
         return {
+            peerId: this.peerId,
             enabled: true,
         };
     }
 
-    public deserialize(data: string): void {
-
+    public deserialize(data: any): void {
+        this.peerId = data.peerId;
     }
 
     public onStart(): void {
@@ -59,8 +72,6 @@ export class Player extends SceneObject implements ISerializable {
     }
 
     public onTick(): void {
-        if(!netMan.isHosting()) return;
-
         this.currentSpeed.x = this.currentSpeed.y = 0;
 
         if(this.leftKey?.isDown) this.currentSpeed.x -= 1;
@@ -70,17 +81,26 @@ export class Player extends SceneObject implements ISerializable {
 
         this.currentSpeed.normalize();
 
-        if(this.currentSpeed.length() == 0) this.sprite.anims?.pause();
-
         if(this.currentSpeed.x < 0) this.currentAnim = 'left';
         if(this.currentSpeed.x > 0) this.currentAnim = 'right';
         if(this.currentSpeed.y < 0) this.currentAnim = 'up';
         if(this.currentSpeed.y > 0) this.currentAnim = 'down';
 
-        this.sprite.anims?.play(this.currentAnim, true);
+        if(!this.isNetworkControlled) {
+            if(this.currentSpeed.length() == 0) this.sprite.anims?.pause();
+            this.sprite.anims?.play(this.currentAnim, true);
 
-        this.transform.position.x += this.currentSpeed.x * this.speed;
-        this.transform.position.y += this.currentSpeed.y * this.speed;
+            this.transform.position.x += this.currentSpeed.x * this.speed;
+            this.transform.position.y += this.currentSpeed.y * this.speed;
+        } else if(netMan.getPeerId() == this.peerId) {
+            this.position.x += this.currentSpeed.x * this.speed;
+            this.position.y += this.currentSpeed.y * this.speed;
+
+            let x = this.position.x;
+            let y = this.position.y;
+
+            if(x != 0 || y != 0) gameEvents.emit('player-move', { x, y });
+        }
 
         super.onTick();
     }
