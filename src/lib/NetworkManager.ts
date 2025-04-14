@@ -14,6 +14,10 @@ export class NetworkManager {
     constructor() {
     }
 
+    public getPlayerList(): string[] {
+        return this.playerList;
+    }
+
     private randomString(length: number = 4): string {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -27,7 +31,7 @@ export class NetworkManager {
         return new Promise((resolve, reject) => {
             this.isHost = true;
             this.peer = new Peer(this.randomString(4), {
-                host: "localhost",
+                host: "192.168.1.163",
                 port: 9000
             });
 
@@ -70,7 +74,7 @@ export class NetworkManager {
     public async join(hostId: string): Promise<void> {
         this.isHost = false;
         this.peer = new Peer(this.randomString(4), {
-            host: "localhost",
+            host: "192.168.1.163",
             port: 9000
         });
 
