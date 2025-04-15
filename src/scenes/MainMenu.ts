@@ -7,7 +7,7 @@ export class MainMenu extends Phaser.Scene {
 
     preload() {
         this.load.image('bg', 'public/assets/bg_1.jpeg');
-        this.load.image('logo', 'public/assets/logo_2.png');
+        this.load.image('logo', 'public/assets/logo_1.png');
         this.load.image('hg', 'public/assets/hg.png');
         this.load.image('jg', 'public/assets/jg.png');
         this.load.image('st', 'public/assets/st.png');
@@ -22,18 +22,18 @@ export class MainMenu extends Phaser.Scene {
 
         // Game Title image logo
         const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
-        logo.setScale(0.2);   
+        logo.setScale(0.16);   
 
         // Host Button
-        const hostButton = this.add.image(centerX - 270, centerY - 50, 'hg').setOrigin(0.5).setInteractive();
+        const hostButton = this.add.image(centerX - 275, centerY - 50, 'hg').setOrigin(0.5).setInteractive();
         hostButton.setScale(0.2);
 
         // Join Button
-        const joinButton = this.add.image(centerX - 270, centerY + 100, 'jg').setOrigin(0.5).setInteractive();
+        const joinButton = this.add.image(centerX - 275, centerY + 100, 'jg').setOrigin(0.5).setInteractive();
         joinButton.setScale(0.2);
 
         // Settings Button
-        const settingsButton = this.add.image(centerX - 312, centerY + 235, 'st').setOrigin(0.5).setInteractive();
+        const settingsButton = this.add.image(centerX - 317, centerY + 235, 'st').setOrigin(0.5).setInteractive();
         settingsButton.setScale(0.15);
 
         // Button Interactions
