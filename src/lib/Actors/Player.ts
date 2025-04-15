@@ -8,6 +8,7 @@ import { netMan } from "../NetworkManager";
 import { gameEvents } from "../GameEvents";
 import { BaseScene } from "../BaseScene";
 import { CameraController } from "../Behaviours/CameraController";
+import { worldBounds } from "../WorldBounds";
 
 export class Player extends SceneObject implements ISerializable {
     public speed: number = 0.3;
@@ -71,14 +72,18 @@ export class Player extends SceneObject implements ISerializable {
         if(!this.isNetworkControlled) {
             this.transform.position.x += this.currentSpeed.x * this.speed * delta;
             this.transform.position.y += this.currentSpeed.y * this.speed * delta;
+
+            this.transform.position = worldBounds.clamp(this.transform.position);
         } else if(netMan.getPeerId() == this.peerId) {
             this.position.x += this.currentSpeed.x * this.speed * delta;
             this.position.y += this.currentSpeed.y * this.speed * delta;
 
+            this.position = worldBounds.clamp(this.transform.position);
+
             let x = this.position.x;
             let y = this.position.y;
 
-            if(x != 0 || y != 0) gameEvents.emit('player-move', { x, y });
+            if(this.currentSpeed.x != 0 || this.currentSpeed.y != 0) gameEvents.emit('player-move', { x, y });
         }
 
         super.onTick(delta);
