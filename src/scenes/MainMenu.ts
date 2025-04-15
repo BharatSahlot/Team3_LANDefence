@@ -18,23 +18,23 @@ export class MainMenu extends Phaser.Scene {
         const centerY = this.cameras.main.centerY;
 
         // Background
-        this.add.image(this.scale.width / 2 + 50, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
+        // this.add.image(this.scale.width / 2 + 50, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
 
         // Game Title image logo
         const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
-        logo.setScale(0.16);   
+        logo.setScale(0.3);   
 
         // Host Button
-        const hostButton = this.add.image(centerX - 275, centerY - 50, 'hg').setOrigin(0.5).setInteractive();
-        hostButton.setScale(0.2);
+        const hostButton = this.add.image(centerX * 0.5 , centerY * 1 , 'hg').setOrigin(0.5).setInteractive();
+        hostButton.setScale(0.4);
 
         // Join Button
-        const joinButton = this.add.image(centerX - 275, centerY + 100, 'jg').setOrigin(0.5).setInteractive();
-        joinButton.setScale(0.2);
+        const joinButton = this.add.image(centerX * 0.5 , centerY * 1.3 , 'jg').setOrigin(0.5).setInteractive();
+        joinButton.setScale(0.4);
 
         // Settings Button
-        const settingsButton = this.add.image(centerX - 317, centerY + 235, 'st').setOrigin(0.5).setInteractive();
-        settingsButton.setScale(0.15);
+        const settingsButton = this.add.image(centerX * 0.4 , centerY * 1.6 , 'st').setOrigin(0.5).setInteractive();
+        settingsButton.setScale(0.3);
 
         // Button Interactions
         hostButton.on('pointerdown', () => {

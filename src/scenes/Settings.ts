@@ -1,134 +1,144 @@
 import Phaser from 'phaser';
 import { globalAudio } from '../lib/AudioManager';
+import { globalVersions } from '../lib/Versions';
 
 export class Settings extends Phaser.Scene {
     private masterText!: Phaser.GameObjects.Text;
     private musicText!: Phaser.GameObjects.Text;
     private fxText!: Phaser.GameObjects.Text;
 
+    // Slider DOM elements for each volume control
+    private masterSlider!: Phaser.GameObjects.DOMElement;
+    private musicSlider!: Phaser.GameObjects.DOMElement;
+    private fxSlider!: Phaser.GameObjects.DOMElement;
+
     constructor() {
         super('Settings');
     }
 
     preload() {
-        this.load.image('bg', 'public/assets/bg_1.jpeg');
         this.load.image('logo', 'public/assets/logo_1.png');
         this.load.image('bk', 'public/assets/bk.png');
     }
 
     create() {
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
-
-        // Background
-        this.add.image(this.scale.width / 2 + 220, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
+        const { width, height, centerX, centerY } = this.cameras.main;
+        const margin = 20;
 
         // Top Logo
-        const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
-        logo.setScale(0.16);
+        const logo = this.add.image(centerX, margin + 80, 'logo')
+            .setOrigin(0.5)
+            .setScale(0.3);
 
-        const backButton = this.add.image(250, 30, 'bk')
-            .setOrigin(1, 0)
+        // Back Button (size unchanged)
+        const backButton = this.add.image(margin + 80, margin + 40, 'bk')
+            .setOrigin(0.5)
+            .setScale(0.2)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 this.scene.start('MainMenu');
             });
-        backButton.setScale(0.12);
 
-        // Master Volume
-        this.masterText = this.add.text(centerX, 300, `Master Volume: ${globalAudio.masterVolume.toFixed(2)}`, {
+        // ----------------------
+        // Volume Options Box
+        // ----------------------
+        // Define the vertical spacing and starting y position for the volume controls
+        const startY = centerY - 100;
+        const spacing = 70;
+
+        // Define box dimensions (you can adjust these values)
+        const boxWidth = 440;
+        // Calculate height: extra padding at the top and bottom of the slider groups
+        const boxHeight = spacing * 2 + 80;
+        const boxX = centerX - boxWidth / 2;
+        const boxY = startY - 60; // include a top padding
+
+        // // Draw a rectangle to frame the volume controls
+        // const graphics = this.add.graphics();
+        // graphics.lineStyle(2, 0xffffff, 1);
+        // graphics.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+        // ----------------------
+        // Master Volume Controls
+        // ----------------------
+        this.masterText = this.add.text(centerX, startY, `Master Volume: ${globalAudio.masterVolume.toFixed(2)}`, {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        // Example: “+” button to increase volume
-        const masterPlus = this.add.text(centerX + 200, 300, '+', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#00ff00',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        masterPlus.on('pointerdown', () => {
-            globalAudio.masterVolume = Phaser.Math.Clamp(globalAudio.masterVolume + 0.1, 0, 1);
+        // Horizontal slider for Master Volume
+        this.masterSlider = this.add.dom(centerX, startY + 30, 'input', 
+            'width: 300px; height: 20px; background: #ccc; border-radius: 4px; appearance: none;'
+        ) as Phaser.GameObjects.DOMElement;
+        // Set the input type to range with proper attributes
+        (this.masterSlider.node as HTMLInputElement).setAttribute('type', 'range');
+        (this.masterSlider.node as HTMLInputElement).setAttribute('min', '0');
+        (this.masterSlider.node as HTMLInputElement).setAttribute('max', '1');
+        (this.masterSlider.node as HTMLInputElement).setAttribute('step', '0.01');
+        (this.masterSlider.node as HTMLInputElement).value = String(globalAudio.masterVolume);
+
+        this.masterSlider.addListener('input');
+        this.masterSlider.on('input', (event: any) => {
+            const value = parseFloat(event.target.value);
+            globalAudio.masterVolume = Phaser.Math.Clamp(value, 0, 1);
             this.updateVolumeTexts();
         });
 
-        // Example: “-” button to decrease volume
-        const masterMinus = this.add.text(centerX - 200, 300, '-', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ff0000',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        masterMinus.on('pointerdown', () => {
-            globalAudio.masterVolume = Phaser.Math.Clamp(globalAudio.masterVolume - 0.1, 0, 1);
-            this.updateVolumeTexts();
-        });
-
-        // Music Volume
-        this.musicText = this.add.text(centerX, 370, `Music Volume: ${globalAudio.musicVolume.toFixed(2)}`, {
+        // ----------------------
+        // Music Volume Controls
+        // ----------------------
+        this.musicText = this.add.text(centerX, startY + spacing, `Music Volume: ${globalAudio.musicVolume.toFixed(2)}`, {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        // “+” button for music
-        const musicPlus = this.add.text(centerX + 200, 370, '+', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#00ff00',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        musicPlus.on('pointerdown', () => {
-            globalAudio.musicVolume = Phaser.Math.Clamp(globalAudio.musicVolume + 0.1, 0, 1);
+        this.musicSlider = this.add.dom(centerX, startY + spacing + 30, 'input', 
+            'width: 300px; height: 20px; background: #ccc; border-radius: 4px; appearance: none;'
+        ) as Phaser.GameObjects.DOMElement;
+        (this.musicSlider.node as HTMLInputElement).setAttribute('type', 'range');
+        (this.musicSlider.node as HTMLInputElement).setAttribute('min', '0');
+        (this.musicSlider.node as HTMLInputElement).setAttribute('max', '1');
+        (this.musicSlider.node as HTMLInputElement).setAttribute('step', '0.01');
+        (this.musicSlider.node as HTMLInputElement).value = String(globalAudio.musicVolume);
+
+        this.musicSlider.addListener('input');
+        this.musicSlider.on('input', (event: any) => {
+            const value = parseFloat(event.target.value);
+            globalAudio.musicVolume = Phaser.Math.Clamp(value, 0, 1);
             this.updateVolumeTexts();
         });
 
-        // “-” button for music
-        const musicMinus = this.add.text(centerX - 200, 370, '-', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ff0000',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        musicMinus.on('pointerdown', () => {
-            globalAudio.musicVolume = Phaser.Math.Clamp(globalAudio.musicVolume - 0.1, 0, 1);
-            this.updateVolumeTexts();
-        });
-
-        // FX Volume
-        this.fxText = this.add.text(centerX, 440, `FX Volume: ${globalAudio.fxVolume.toFixed(2)}`, {
+        // ----------------------
+        // FX Volume Controls
+        // ----------------------
+        this.fxText = this.add.text(centerX, startY + spacing * 2, `FX Volume: ${globalAudio.fxVolume.toFixed(2)}`, {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
-        // “+” button for FX
-        const fxPlus = this.add.text(centerX + 200, 440, '+', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#00ff00',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        fxPlus.on('pointerdown', () => {
-            globalAudio.fxVolume = Phaser.Math.Clamp(globalAudio.fxVolume + 0.1, 0, 1);
+        this.fxSlider = this.add.dom(centerX, startY + spacing * 2 + 30, 'input', 
+            'width: 300px; height: 20px; background: #ccc; border-radius: 4px; appearance: none;'
+        ) as Phaser.GameObjects.DOMElement;
+        (this.fxSlider.node as HTMLInputElement).setAttribute('type', 'range');
+        (this.fxSlider.node as HTMLInputElement).setAttribute('min', '0');
+        (this.fxSlider.node as HTMLInputElement).setAttribute('max', '1');
+        (this.fxSlider.node as HTMLInputElement).setAttribute('step', '0.01');
+        (this.fxSlider.node as HTMLInputElement).value = String(globalAudio.fxVolume);
+
+        this.fxSlider.addListener('input');
+        this.fxSlider.on('input', (event: any) => {
+            const value = parseFloat(event.target.value);
+            globalAudio.fxVolume = Phaser.Math.Clamp(value, 0, 1);
             this.updateVolumeTexts();
         });
 
-        // “-” button for FX
-        const fxMinus = this.add.text(centerX - 200, 440, '-', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ff0000',
-            backgroundColor: '#000000'
-        }).setOrigin(0.5).setInteractive();
-        fxMinus.on('pointerdown', () => {
-            globalAudio.fxVolume = Phaser.Math.Clamp(globalAudio.fxVolume - 0.1, 0, 1);
-            this.updateVolumeTexts();
-        });
-
-        this.add.text(centerX, 520, 'Game Version: 1.0.0', {
+        // ----------------------
+        // Game Version
+        // ----------------------
+        this.add.text(centerX, height - margin - 20, `Game Version: ${globalVersions.masterVersion}`, {
             fontFamily: 'Arial',
             fontSize: '18px',
             color: '#ffff00'

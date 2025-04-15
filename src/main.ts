@@ -30,6 +30,7 @@ const config: Types.Core.GameConfig = {
         keyboard: true,
         mouse: true,
     },
+    dom: { createContainer: true },
 };
 
 export default new Game(config);

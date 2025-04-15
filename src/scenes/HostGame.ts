@@ -18,27 +18,25 @@ export class HostGame extends Phaser.Scene {
     }
 
     create() {
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
-         // Background
-         this.add.image(this.scale.width / 2 + 220, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
+        const { width, height, centerX, centerY } = this.cameras.main;
+        const margin = 20;
 
-        //  // Game Title image logo
-         const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
-         logo.setScale(0.16);   
+        // Top Logo
+        const logo = this.add.image(centerX, margin + 80, 'logo')
+            .setOrigin(0.5)
+            .setScale(0.3);
 
-
-        // Back to main menu button (top-right corner)
-        const backButton = this.add.image(250 , 30, 'bk')
-        .setOrigin(1, 0)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.scene.start('MainMenu');
-        });
-        backButton.setScale(0.12); 
+        // Back Button (size unchanged)
+        const backButton = this.add.image(margin + 80, margin + 40, 'bk')
+            .setOrigin(0.5)
+            .setScale(0.2)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start('MainMenu');
+            });
 
         // Peer ID display
-        this.peerIdText = this.add.text(centerX, centerY - 150, 'Your ID: <waiting...>', {
+        this.peerIdText = this.add.text(centerX, centerY * 1, 'Your ID: <waiting...>', {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#00ffcc',
@@ -51,7 +49,7 @@ export class HostGame extends Phaser.Scene {
         });
 
         // Player list header
-        this.add.text(centerX, centerY - 110, 'Players Joined:', {
+        this.add.text(centerX, centerY * 0.8, 'Players Joined:', {
             fontFamily: 'Arial',
             fontSize: '28px',
             color: '#ffffff',
@@ -63,8 +61,8 @@ export class HostGame extends Phaser.Scene {
         });
 
         // Start Game Button
-        const startButton = this.add.image(centerX - 50, 550, 'sg').setOrigin(0.5).setInteractive();
-        startButton.setScale(0.185);
+        const startButton = this.add.image(centerX - 50, centerY * 1.5, 'sg').setOrigin(0.5).setInteractive();
+        startButton.setScale(0.5);
 
         startButton.on('pointerdown', () => {
             this.scene.start('Game'); // Replace with your game scene
