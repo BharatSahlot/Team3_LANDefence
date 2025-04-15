@@ -66,6 +66,30 @@ export class JoinGame extends Phaser.Scene {
             console.log(players);
             this.updatePlayerList(players);
         });
+
+        netMan.on('lobby-full', () => {
+            this.inputWrapper?.remove();
+            this.showLobbyFullMessage();
+            setTimeout(() => {
+                netMan.reset();
+                window.location.reload();
+            }, 2000);
+        });
+    }
+
+    private showLobbyFullMessage() {
+        const message = this.add.text(this.cameras.main.centerX, 300, 'Lobby is full. Please try another Host ID.', {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            color: '#ff5555',
+            backgroundColor: '#000000',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5);
+    
+        setTimeout(() => {
+            message.destroy();
+            this.createInput(this.cameras.main.centerX);
+        }, 2000);
     }
 
     private createInput(x: number, y: number ) {
@@ -113,6 +137,10 @@ export class JoinGame extends Phaser.Scene {
             this.connected = true;
             this.inputWrapper.remove();
             this.hostIdLabel.destroy();
+
+            window.addEventListener('beforeunload', () => {
+                netMan.reset();  // Disconnects from host and frees lobby slot
+            });
 
             // Show player list title
             this.add.text(this.cameras.main.centerX, 180, 'Players in Game:', {

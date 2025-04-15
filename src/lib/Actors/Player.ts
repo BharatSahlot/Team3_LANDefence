@@ -78,7 +78,7 @@ export class Player extends SceneObject implements ISerializable {
             this.position.x += this.currentSpeed.x * this.speed * delta;
             this.position.y += this.currentSpeed.y * this.speed * delta;
 
-            this.position = worldBounds.clamp(this.transform.position);
+            this.position = worldBounds.clamp(this.position);
 
             let x = this.position.x;
             let y = this.position.y;

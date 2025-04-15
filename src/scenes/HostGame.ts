@@ -46,6 +46,7 @@ export class HostGame extends Phaser.Scene {
 
         // Update with real ID when ready
         netMan.host().then(id => {
+            console.log(`Hosting as: ${id}`);
             this.peerIdText.setText(`Your ID: ${id}`);
         });
 
