@@ -88,7 +88,7 @@ export class JoinGame extends Phaser.Scene {
         // });
 
         const centerX = this.cameras.main.centerX;
-        const joinButton = this.add.image(centerX, 550, 'jg').setOrigin(0.5).setInteractive();
+        const joinButton = this.add.image(centerX - 20, 550, 'jg').setOrigin(0.5).setInteractive();
         joinButton.setScale(0.18);
 
         joinButton.on('pointerdown', () => {

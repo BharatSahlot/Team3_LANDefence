@@ -62,7 +62,7 @@ export class HostGame extends Phaser.Scene {
         });
 
         // Start Game Button
-        const startButton = this.add.image(centerX, 550, 'sg').setOrigin(0.5).setInteractive();
+        const startButton = this.add.image(centerX - 50, 550, 'sg').setOrigin(0.5).setInteractive();
         startButton.setScale(0.185);
 
         startButton.on('pointerdown', () => {
