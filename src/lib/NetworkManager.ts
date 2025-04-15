@@ -1,5 +1,6 @@
 import Peer, { DataConnection } from 'peerjs';
 import { gameEvents } from './GameEvents';
+import { networkSettings } from '../main';
 
 type NetworkEventHandler = (data: any, peerId: string) => void;
 
@@ -30,10 +31,8 @@ export class NetworkManager {
     public async host(): Promise<string> {
         return new Promise((resolve, reject) => {
             this.isHost = true;
-            this.peer = new Peer(this.randomString(4), {
-                host: "192.168.1.163",
-                port: 9000
-            });
+            console.log(networkSettings);
+            this.peer = new Peer(this.randomString(4), networkSettings);
 
             this.peer.on('open', (id) => {
                 console.log('Hosting as:', id);
@@ -73,10 +72,7 @@ export class NetworkManager {
 
     public async join(hostId: string): Promise<void> {
         this.isHost = false;
-        this.peer = new Peer(this.randomString(4), {
-            host: "192.168.1.163",
-            port: 9000
-        });
+        this.peer = new Peer(this.randomString(4), networkSettings);
 
         return new Promise((resolve, reject) => {
             this.peer.on('open', () => {
