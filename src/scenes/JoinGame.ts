@@ -37,7 +37,6 @@ export class JoinGame extends Phaser.Scene {
             .setScale(0.2)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
-                // Clean up the input elements before switching scene
                 this.removeInput();
                 this.scene.start('MainMenu');
             });
@@ -60,14 +59,11 @@ export class JoinGame extends Phaser.Scene {
 
         netMan.on('lobby-full', () => {
             this.removeInput();
-            this.showLobbyFullMessage();
-            setTimeout(() => {
-                netMan.reset();
-                window.location.reload();
-            }, 2000);
+            this.scene.start('MainMenu');
+            alert('Lobby is full');
         });
 
-        // Remove the input elements if the scene is shut down
+        // Clean up input elements on scene shutdown/destroy
         this.events.on('shutdown', () => {
             this.removeInput();
         });
@@ -122,7 +118,6 @@ export class JoinGame extends Phaser.Scene {
 
         netMan.once('connected-to-host', () => {
             this.connected = true;
-            // Remove the input element upon successful connection
             this.removeInput();
             this.hostIdLabel.destroy();
 
