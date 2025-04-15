@@ -43,5 +43,9 @@ export default defineConfig({
     },
     plugins: [
         phasermsg()
-    ]
+    ],
+    define: {
+        'import.meta.env.PEER_URL': JSON.stringify(process.env.PEER_URL || 'localhost'),
+        'import.meta.env.PEER_PORT': JSON.stringify(process.env.PEER_PORT || '9000'),
+    }
 });
