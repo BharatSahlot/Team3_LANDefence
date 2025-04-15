@@ -15,36 +15,47 @@ export class JoinGame extends Phaser.Scene {
         super('JoinGame');
     }
 
+    preload() {
+        this.load.image('bg', 'public/assets/bg_1.jpeg');
+        this.load.image('logo', 'public/assets/logo_1.png');
+        this.load.image('bk', 'public/assets/bk.png');
+        this.load.image('jg', 'public/assets/jg.png');
+    }
+
     create() {
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.centerY;
+         // Background
+         this.add.image(this.scale.width / 2 + 200, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
+
+        //  // Game Title image logo
+         const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
+         logo.setScale(0.16);   
+
+
         // Back to main menu button (top-right corner)
-        const backButton = this.add.text(this.cameras.main.width - 30, 20, '← Back', {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#ffffff',
-            backgroundColor: '#333',
-            padding: { left: 10, right: 10, top: 5, bottom: 5 },
-        })
+        const backButton = this.add.image(250 , 30, 'bk')
         .setOrigin(1, 0)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => {
-            this.inputWrapper?.remove();  // Clean up input
             this.scene.start('MainMenu');
         });
+        backButton.setScale(0.12); 
+        
+        // const centerX = this.cameras.main.centerX;
 
-        const centerX = this.cameras.main.centerX;
-
-        // Title
-        this.add.text(centerX, 60, 'Join Game Game', {
-            fontFamily: 'Arial',
-            fontSize: '48px',
-            color: '#ffffff',
-        }).setOrigin(0.5);
+        // // Title
+        // this.add.text(centerX, 60, 'Join Game Game', {
+        //     fontFamily: 'Arial',
+        //     fontSize: '48px',
+        //     color: '#ffffff',
+        // }).setOrigin(0.5);
 
         // Create HTML input box
-        this.createInput(centerX);
+        this.createInput(centerX, centerY);
 
         // Instruction
-        this.hostIdLabel = this.add.text(centerX, 130, 'Enter Host ID:', {
+        this.hostIdLabel = this.add.text(centerX, centerY - 100, 'Enter Host ID:', {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff',
@@ -57,11 +68,11 @@ export class JoinGame extends Phaser.Scene {
         });
     }
 
-    private createInput(x: number) {
+    private createInput(x: number, y: number ) {
         this.inputWrapper = document.createElement('div');
         this.inputWrapper.style.position = 'absolute';
-        this.inputWrapper.style.left = `${x - 100}px`;
-        this.inputWrapper.style.top = '160px';
+        this.inputWrapper.style.left = `${x + 100}px`;
+        this.inputWrapper.style.top = `${y}px`;
 
         this.inputBox = document.createElement('input');
         this.inputBox.type = 'text';
@@ -77,13 +88,8 @@ export class JoinGame extends Phaser.Scene {
         // });
 
         const centerX = this.cameras.main.centerX;
-        const joinButton = this.add.text(centerX, 600, 'Join Game', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#0077aa',
-            padding: { x: 20, y: 10 },
-        }).setOrigin(0.5).setInteractive();
+        const joinButton = this.add.image(centerX, 550, 'jg').setOrigin(0.5).setInteractive();
+        joinButton.setScale(0.18);
 
         joinButton.on('pointerdown', () => {
             joinButton.destroy();
