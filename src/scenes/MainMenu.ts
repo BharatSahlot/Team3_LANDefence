@@ -6,47 +6,35 @@ export class MainMenu extends Phaser.Scene {
     }
 
     preload() {
-        // You can load fonts or UI assets here
+        this.load.image('bg', 'public/assets/bg_1.jpeg');
+        this.load.image('logo', 'public/assets/logo_2.png');
+        this.load.image('hg', 'public/assets/hg.png');
+        this.load.image('jg', 'public/assets/jg.png');
+        this.load.image('st', 'public/assets/st.png');
     }
 
     create() {
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
 
-        // Game Title
-        const title = this.add.text(centerX, 120, 'LAN Defense', {
-            fontFamily: 'Arial',
-            fontSize: '64px',
-            color: '#ffffff',
-        });
-        title.setOrigin(0.5);
+        // Background
+        this.add.image(this.scale.width / 2 + 50, this.scale.height / 2, 'bg').setOrigin(0.5, 0.5);
+
+        // Game Title image logo
+        const logo = this.add.image(centerX, 120, 'logo').setOrigin(0.5);
+        logo.setScale(0.2);   
 
         // Host Button
-        const hostButton = this.add.text(centerX, centerY - 40, 'Host Game', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#444',
-            padding: { x: 20, y: 10 },
-        }).setOrigin(0.5).setInteractive();
+        const hostButton = this.add.image(centerX - 270, centerY - 50, 'hg').setOrigin(0.5).setInteractive();
+        hostButton.setScale(0.2);
 
         // Join Button
-        const joinButton = this.add.text(centerX, centerY + 40, 'Join Game', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#444',
-            padding: { x: 20, y: 10 },
-        }).setOrigin(0.5).setInteractive();
+        const joinButton = this.add.image(centerX - 270, centerY + 100, 'jg').setOrigin(0.5).setInteractive();
+        joinButton.setScale(0.2);
 
         // Settings Button
-        const settingsButton = this.add.text(centerX, centerY + 140, 'Settings', {
-            fontFamily: 'Arial',
-            fontSize: '28px',
-            color: '#dddddd',
-            backgroundColor: '#222',
-            padding: { x: 15, y: 8 },
-        }).setOrigin(0.5).setInteractive();
+        const settingsButton = this.add.image(centerX - 312, centerY + 235, 'st').setOrigin(0.5).setInteractive();
+        settingsButton.setScale(0.15);
 
         // Button Interactions
         hostButton.on('pointerdown', () => {
