@@ -10,6 +10,7 @@ export class NetworkManager {
 
     private isHost = false;
     private playerList: string[] = [];
+    private readonly MAX_PLAYERS = 4;
 
     constructor() {
     }
@@ -31,7 +32,7 @@ export class NetworkManager {
         return new Promise((resolve, reject) => {
             this.isHost = true;
             this.peer = new Peer(this.randomString(4), {
-                host: "192.168.1.163",
+                host: "10.1.35.179",
                 port: 9000
             });
 
@@ -44,15 +45,34 @@ export class NetworkManager {
             });
 
             this.peer.on('connection', (conn) => {
-                this.addConnection(conn);
-                this.emit('player-joined', { id: conn.peer }, conn.peer);
-
+                if (this.playerList.length >= this.MAX_PLAYERS) {
+                    console.log(`Lobby full. Rejecting: ${conn.peer}`);
+                    conn.on('open', () => {
+                        conn.send({ type: 'lobby-full', payload: null });
+                        conn.close(); // Optional: close connection after sending message
+                    });
+                    return;
+                }
+            this.addConnection(conn);
+            this.emit('player-joined', { id: conn.peer }, conn.peer);
+        
                 conn.on('open', () => {
                     this.playerList.push(conn.peer);
                     this.emit('update-player-list', this.playerList, conn.peer);
-                    this.send({ type: 'update-player-list', payload: this.playerList })
+                    this.send({ type: 'update-player-list', payload: this.playerList });
                 });
             });
+
+            // this.peer.on('connection', (conn) => {
+            //     this.addConnection(conn);
+            //     this.emit('player-joined', { id: conn.peer }, conn.peer);
+
+            //     conn.on('open', () => {
+            //         this.playerList.push(conn.peer);
+            //         this.emit('update-player-list', this.playerList, conn.peer);
+            //         this.send({ type: 'update-player-list', payload: this.playerList })
+            //     });
+            // });
 
             this.peer.on('error', reject);
         });
@@ -74,7 +94,7 @@ export class NetworkManager {
     public async join(hostId: string): Promise<void> {
         this.isHost = false;
         this.peer = new Peer(this.randomString(4), {
-            host: "192.168.1.163",
+            host: "10.1.35.179",
             port: 9000
         });
 
@@ -102,13 +122,29 @@ export class NetworkManager {
     private addConnection(conn: DataConnection) {
         this.connections.set(conn.peer, conn);
 
+        // conn.on('data', (data) => {
+        //     this.emit(data.type, data.payload, conn.peer);
+        // });
         conn.on('data', (data) => {
+            if (data.type === 'lobby-full') {
+                console.log("Received lobby-full from host");
+                this.emit('lobby-full', null, conn.peer);
+                conn.close(); // Optional: ensure disconnection
+                return;
+            }
             this.emit(data.type, data.payload, conn.peer);
         });
 
         conn.on('close', () => {
             this.connections.delete(conn.peer);
             this.emit('player-left', { id: conn.peer }, conn.peer);
+
+            // ✅ If host, also remove from player list and notify others
+            if (this.isHost) {
+                this.playerList = this.playerList.filter(id => id !== conn.peer);
+                this.send({ type: 'update-player-list', payload: this.playerList });
+                this.emit('update-player-list', this.playerList, this.peer.id);
+            }
         });
 
         // conn.on('')
