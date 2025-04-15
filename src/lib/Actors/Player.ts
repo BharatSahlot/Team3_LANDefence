@@ -30,8 +30,10 @@ export class Player extends SceneObject implements ISerializable {
 
         this.transform = new Transform(this);
         this.transform.position = new Phaser.Math.Vector2(
-            Phaser.Math.Between(-250, 250),
-            Phaser.Math.Between(-250, 250)
+            // Phaser.Math.Between(-250, 250),
+            // Phaser.Math.Between(-250, 250)
+            100,
+            100
         );
         this.position = this.transform.position;
         this.transform.scale = new Phaser.Math.Vector2(2, 2);

@@ -10,6 +10,8 @@ export class SceneObject {
 
     protected id: string = this.randomString(24);
 
+    private _started: boolean = false;
+
     constructor(scene: BaseScene) {
         this.scene = scene;
         this.behaviours = [];
@@ -36,7 +38,8 @@ export class SceneObject {
     public getScene(): BaseScene { return this.scene; }
 
     public addBehaviour<T extends Behaviour>(b: T): void {
-        this.newBehaviours = [...this.newBehaviours, b];
+        if(this._started) this.newBehaviours = [...this.newBehaviours, b];
+        else this.behaviours = [...this.behaviours, b];
     }
 
     getComponent<T extends Behaviour>(type: new (...args: any[]) => T): T | undefined {
@@ -59,8 +62,7 @@ export class SceneObject {
     }
 
     public onStart(): void {
-        this.behaviours = [...this.newBehaviours];
-        this.newBehaviours = [];
+        this._started = true;
 
         this.behaviours.forEach(b => {
             b.onStart?.();

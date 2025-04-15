@@ -6,6 +6,7 @@ import { Transform } from '../lib/Behaviours/Transform';
 import { ISerializable } from '../lib/ISerializable';
 import { SceneObject } from '../lib/SceneObject';
 import { BaseScene } from '../lib/BaseScene';
+import { BaseEnemy } from '../lib/Actors/BaseEnemy';
 
 export class Game extends BaseScene
 {
@@ -26,6 +27,11 @@ export class Game extends BaseScene
         this.load.setPath('assets');
 
         this.load.spritesheet('gold-knight', './NinjaPack/Actor/Characters/KnightGold/SpriteSheet.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
+        this.load.spritesheet('blue-bat', './NinjaPack/Actor/Monsters/BlueBat/SpriteSheet.png', {
             frameWidth: 16,
             frameHeight: 16
         });
@@ -94,6 +100,21 @@ export class Game extends BaseScene
                 player.transform.position.y = data.y;
             });
 
+            let i = 0;
+            while(i < 500) {
+                let enemy = new BaseEnemy(this, "blue-bat");
+                let transform = enemy.getComponent(Transform);
+                if(transform) {
+                    this.transforms.set(enemy.getId(), transform);
+                }
+
+                this.objectsStates.set(enemy.getId(), enemy);
+                this.objects.push(enemy);
+
+                enemy.onStart();
+                i++;
+            }
+
         } else {
             // peer side
             gameEvents.on('state-update', (data: any, _) => {
@@ -116,6 +137,16 @@ export class Game extends BaseScene
 
                             this.objects.push(player);
                             player.onStart();
+                        } else if(data[id].type == 'BaseEnemy') {
+                            let enemy = new BaseEnemy(this, "blue-bat");
+                            enemy.setId(id);
+                            enemy.deserialize(data[id].data);
+
+                            this.transforms.set(id, enemy.transform);
+                            this.objectsStates.set(id, enemy);
+                            this.objects.push(enemy);
+
+                            enemy.onStart();
                         }
                     }
                 }
