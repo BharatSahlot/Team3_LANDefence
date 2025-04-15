@@ -1,5 +1,6 @@
 import Peer, { DataConnection } from 'peerjs';
 import { gameEvents } from './GameEvents';
+import { networkSettings } from '../main';
 
 type NetworkEventHandler = (data: any, peerId: string) => void;
 
@@ -31,11 +32,7 @@ export class NetworkManager {
     public async host(): Promise<string> {
         return new Promise((resolve, reject) => {
             this.isHost = true;
-            this.peer = new Peer(this.randomString(4), {
-                host: "10.1.35.179",
-                port: 9000
-            });
-
+            this.peer = new Peer(this.randomString(4), networkSettings);
             this.peer.on('open', (id) => {
                 console.log('Hosting as:', id);
 
@@ -53,26 +50,14 @@ export class NetworkManager {
                     });
                     return;
                 }
-            this.addConnection(conn);
-            this.emit('player-joined', { id: conn.peer }, conn.peer);
-        
+                this.addConnection(conn);
+                this.emit('player-joined', { id: conn.peer }, conn.peer);
                 conn.on('open', () => {
                     this.playerList.push(conn.peer);
                     this.emit('update-player-list', this.playerList, conn.peer);
                     this.send({ type: 'update-player-list', payload: this.playerList });
                 });
             });
-
-            // this.peer.on('connection', (conn) => {
-            //     this.addConnection(conn);
-            //     this.emit('player-joined', { id: conn.peer }, conn.peer);
-
-            //     conn.on('open', () => {
-            //         this.playerList.push(conn.peer);
-            //         this.emit('update-player-list', this.playerList, conn.peer);
-            //         this.send({ type: 'update-player-list', payload: this.playerList })
-            //     });
-            // });
 
             this.peer.on('error', reject);
         });
@@ -93,11 +78,7 @@ export class NetworkManager {
 
     public async join(hostId: string): Promise<void> {
         this.isHost = false;
-        this.peer = new Peer(this.randomString(4), {
-            host: "10.1.35.179",
-            port: 9000
-        });
-
+        this.peer = new Peer(this.randomString(4), networkSettings);
         return new Promise((resolve, reject) => {
             this.peer.on('open', () => {
                 console.log("connected to peer server");
@@ -122,9 +103,6 @@ export class NetworkManager {
     private addConnection(conn: DataConnection) {
         this.connections.set(conn.peer, conn);
 
-        // conn.on('data', (data) => {
-        //     this.emit(data.type, data.payload, conn.peer);
-        // });
         conn.on('data', (data) => {
             if (data.type === 'lobby-full') {
                 console.log("Received lobby-full from host");

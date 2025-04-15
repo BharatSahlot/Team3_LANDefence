@@ -31,3 +31,8 @@ const config: Types.Core.GameConfig = {
 };
 
 export default new Game(config);
+
+export const networkSettings = {
+    host: import.meta.env.PEER_URL || "localhost",
+    port: import.meta.env.PEER_PORT || "9000"
+};
