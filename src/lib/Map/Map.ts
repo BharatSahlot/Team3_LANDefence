@@ -1,24 +1,4 @@
-export class Tile {
-    x: number;
-    y: number;
-    size: number;
-    occupiedBy: string | null;
-
-    constructor(x: number, y: number, size: number) {
-        this.x = x;
-        this.y = y;
-        this.size = size;
-        this.occupiedBy = null;
-    }
-
-    occupy(objectName: string) {
-        this.occupiedBy = objectName;
-    }
-
-    vacate() {
-        this.occupiedBy = null;
-    }
-}
+import { Tile } from "./Tile";
 
 export class Map {
     tilesetWidth: number;
@@ -66,5 +46,37 @@ export class Map {
             return this.tiles[y][x];
         }
         return null;
+    }
+
+    isValid(x: number, y: number): boolean {
+        return (x >= 0 && x < this.tilesetWidth && y >= 0 && y < this.tilesetHeight);
+    }
+
+    getTileAtWorldPos(x: number, y: number): Tile | null {
+        const pos = this.getWorldPositionToTile(x, y);
+        if(pos) return this.getTileAt(pos.x, pos.y);
+        return null;
+    }
+
+    public getNeighbors(tile: Tile): Tile[] {
+        const { x, y } = tile;
+        const neighbors: Tile[] = [];
+        const deltas = [
+            { dx: 0, dy: -1 },
+            { dx: 0, dy: 1 },
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+        ];
+
+        for (const { dx, dy } of deltas) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (this.isValid(nx, ny)) {
+                const tile = this.getTileAt(nx, ny);
+                if(tile) neighbors.push(tile);
+            }
+        }
+
+        return neighbors;
     }
 }
