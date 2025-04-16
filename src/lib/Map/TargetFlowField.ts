@@ -1,17 +1,26 @@
 import { Map } from './Map';
 import { Tile } from './Tile';
+import { Heap } from 'heap-js';
 
 type TargetSource = {
     tile: Tile;
     priority: number; // lower = more important
 };
 
+const heapComparator = (a: TargetSource, b: TargetSource) => {
+    return a.priority - b.priority;
+};
+
 export class TargetFlowField {
     private map: Map;
 
-    public refreshDelay = 500;
+    public refreshDelay = 1000;
 
     private timeSinceLastRefresh = 0;
+
+    private firstRefresh = false;
+
+    private ri = 0;
 
     constructor(map: Map) {
         this.map = map;
@@ -20,8 +29,9 @@ export class TargetFlowField {
     public refresh(delta: number) {
         this.timeSinceLastRefresh += delta;
 
-        if(this.timeSinceLastRefresh < this.refreshDelay) return;
+        if(!this.firstRefresh && this.timeSinceLastRefresh < this.refreshDelay) return;
 
+        this.firstRefresh = false;
         const sources: TargetSource[] = [];
 
         const cTile = this.map.getTileAtWorldPos(0, 0);
@@ -33,7 +43,7 @@ export class TargetFlowField {
             for(const tile of row) {
                 // TODO: dont hardcode this priority here
                 if (tile.occupiedBy?.occupantType === 'player' || tile.occupiedBy?.occupantType === 'building') {
-                    sources.push({ tile, priority: 5 }); // higher = less attractive
+                    sources.push({ tile, priority: 2 }); // higher = less attractive
                 }
             }
         }
@@ -43,6 +53,7 @@ export class TargetFlowField {
     }
 
     private computeFlowField(sources: TargetSource[]) {
+        this.ri++;
         // Reset tiles
         for (const row of this.map.tiles) {
             for (const tile of row) {
@@ -51,30 +62,28 @@ export class TargetFlowField {
             }
         }
 
-        // Min-heap style priority queue
-        const queue: { tile: Tile; priority: number }[] = [];
+        const pq = new Heap(heapComparator);
 
         for (const src of sources) {
-            src.tile.distance = src.priority;
-            queue.push({ tile: src.tile, priority: src.priority });
+            src.tile.distance = 0;
+            pq.push({ tile: src.tile, priority: src.priority });
         }
 
-        queue.sort((a, b) => a.priority - b.priority);
+        while (!pq.isEmpty()) {
+            const current = pq.pop()!;
+            const currentDist = current.priority;
 
-        while (queue.length > 0) {
-            const { tile: current } = queue.shift()!;
-            const neighbors = this.map.getNeighbors(current);
+            for (const neighbor of this.map.getNeighbors(current.tile)) {
 
-            for (const neighbor of neighbors) {
-                if (neighbor.isBlocked()) continue;
+                if (neighbor.isOccupied()) continue;
 
-                const tentativeDist = current.distance + 1;
+                const newDist = currentDist + 1;
 
-                if (tentativeDist < neighbor.distance) {
-                    neighbor.distance = tentativeDist;
-                    neighbor.nextTargetTile = current;
-                    queue.push({ tile: neighbor, priority: tentativeDist });
-                    queue.sort((a, b) => a.priority - b.priority); // keep sorted
+                if (newDist < neighbor.distance) {
+                    neighbor.distance = newDist;
+                    neighbor.nextTargetTile = current.tile;
+
+                    pq.push({ tile: neighbor, priority: newDist })
                 }
             }
         }

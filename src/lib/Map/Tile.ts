@@ -24,11 +24,11 @@ export class Tile {
     }
 
     isOccupied() {
-        return this.isOccupied != null;
+        return this.occupiedBy != null;
     }
 
     isBlocked() {
-        return false;
+        return this.isOccupied();
     }
 }
 

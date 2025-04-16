@@ -59,7 +59,11 @@ export class Map {
     }
 
     public getNeighbors(tile: Tile): Tile[] {
-        const { x, y } = tile;
+        const x = Math.floor((tile.x - this.topLeftX) / this.tileSize);
+        const y = Math.floor((tile.y - this.topLeftY) / this.tileSize);
+
+        if(!this.isValid(x, y)) return [];
+
         const neighbors: Tile[] = [];
         const deltas = [
             { dx: 0, dy: -1 },
@@ -76,7 +80,6 @@ export class Map {
                 if(tile) neighbors.push(tile);
             }
         }
-
         return neighbors;
     }
 }

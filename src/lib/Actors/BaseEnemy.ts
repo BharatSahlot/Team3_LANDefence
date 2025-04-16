@@ -7,7 +7,6 @@ import { netMan } from "../NetworkManager";
 import { SceneObject } from "../SceneObject";
 import { Map as GameMap } from "../Map/Map";
 import { Game } from "../../scenes/Game";
-import { TargetChooser } from "../Map/TargetChooser";
 
 export class BaseEnemy extends SceneObject implements ISerializable {
     protected currentAnim = "idle";
@@ -22,7 +21,6 @@ export class BaseEnemy extends SceneObject implements ISerializable {
     public speed: number = 0.2;
     
     protected targetReached: boolean = false;
-    protected targetChooser!: TargetChooser;
 
     protected game!: Game;
     protected map!: GameMap;
@@ -53,8 +51,6 @@ export class BaseEnemy extends SceneObject implements ISerializable {
 
         this.game = this.scene as Game;
         this.map = this.game.map;
-        const centerTile = this.game.map.getTileAt(0, 0);
-        if(centerTile) this.targetChooser = new TargetChooser(this.game.map, centerTile);
     }
 
     public onTick(delta: number): void {
@@ -63,6 +59,7 @@ export class BaseEnemy extends SceneObject implements ISerializable {
         if(netMan.isHosting()) {
             const cTile = this.map.getTileAtWorldPos(this.transform.position.x, this.transform.position.y);
             if(cTile?.nextTargetTile) {
+                console.log(cTile.nextTargetTile);
                 this.target.x = cTile.nextTargetTile.x;
                 this.target.y = cTile.nextTargetTile.y;
             }
@@ -74,7 +71,7 @@ export class BaseEnemy extends SceneObject implements ISerializable {
     protected moveToTarget(delta: number): void {
         const distance = this.transform.position.distance(this.target);
 
-        if(distance > 30) {
+        if(distance > 1) {
             let dir = this.target.subtract(this.transform.position).normalize();
 
             let maxDist = this.speed * delta;

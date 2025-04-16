@@ -9,9 +9,15 @@ import { gameEvents } from "../GameEvents";
 import { BaseScene } from "../BaseScene";
 import { CameraController } from "../Behaviours/CameraController";
 import { worldBounds } from "../WorldBounds";
+import { Map } from "../Map/Map";
+import { Game } from "../../scenes/Game";
+import { IOccupiable } from "../Map/IOccupiable";
+import { Tile } from "../Map/Tile";
 
-export class Player extends SceneObject implements ISerializable {
+export class Player extends SceneObject implements ISerializable, IOccupiable {
     public speed: number = 0.3;
+
+    public occupantType = "player";
 
     public transform: Transform;
     
@@ -23,6 +29,11 @@ export class Player extends SceneObject implements ISerializable {
     private position: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0);
 
     public peerId: string;
+
+    private map: Map;
+
+    private cTile: Tile | null;
+
     constructor(scene: BaseScene, isNetworkControlled: boolean = false) {
         super(scene);
         
@@ -30,10 +41,8 @@ export class Player extends SceneObject implements ISerializable {
 
         this.transform = new Transform(this);
         this.transform.position = new Phaser.Math.Vector2(
-            // Phaser.Math.Between(-250, 250),
-            // Phaser.Math.Between(-250, 250)
-            100,
-            100
+            Phaser.Math.Between(-250, 250),
+            Phaser.Math.Between(-250, 250)
         );
         this.position = this.transform.position;
         this.transform.scale = new Phaser.Math.Vector2(2, 2);
@@ -41,6 +50,11 @@ export class Player extends SceneObject implements ISerializable {
 
         this.sprite = new SpriteRenderer(this, "gold-knight");
         this.addBehaviour(this.sprite);
+
+        const game = this.scene as Game;
+        this.map = game.map;
+
+        this.cTile = this.map.getTileAtWorldPos(this.transform.position.x, this.transform.position.y);
     }
 
     getType(): string {
@@ -86,6 +100,15 @@ export class Player extends SceneObject implements ISerializable {
             let y = this.position.y;
 
             if(this.currentSpeed.x != 0 || this.currentSpeed.y != 0) gameEvents.emit('player-move', { x, y });
+        }
+
+        if(netMan.isHosting()) {
+            if(this.cTile) this.cTile.vacate();
+
+            const tile = this.map.getTileAtWorldPos(this.transform.position.x, this.transform.position.y);
+            if(tile) tile.occupy(this);
+
+            this.cTile = tile;
         }
 
         super.onTick(delta);

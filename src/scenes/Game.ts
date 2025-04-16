@@ -109,7 +109,7 @@ export class Game extends BaseScene
             });
 
             let i = 0;
-            while(i < 20) {
+            while(i < 1) {
                 let enemy = new BaseEnemy(this, "blue-bat");
                 let transform = enemy.getComponent(Transform);
                 if(transform) {
@@ -176,7 +176,9 @@ export class Game extends BaseScene
     }
 
     override update(time: number, delta: number) {
-        this.targetFlowField.refresh();
+        if(netMan.isHosting()) {
+            this.targetFlowField.refresh(delta);
+        }
 
         this.objects.forEach(obj => obj.onTick(delta));
 
