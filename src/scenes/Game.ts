@@ -114,7 +114,7 @@ export class Game extends BaseScene
             });
 
             let i = 0;
-            while(i < 300) {
+            while(i < 1) {
                 let enemy = new BaseEnemy(this, "blue-bat");
                 let transform = enemy.getComponent(Transform);
                 if(transform) {

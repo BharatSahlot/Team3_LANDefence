@@ -12,13 +12,14 @@ export class BaseEnemy extends SceneObject implements ISerializable {
     protected currentAnim = "idle";
 
     protected sprite: SpriteRenderer;
-    protected target: Phaser.Math.Vector2 | undefined = undefined;
+    protected target: Transform | null = null;
 
     private spriteTag: string;
 
     public transform: Transform;
     
     public speed: number = 0.2;
+    public distanceFromTarget: number = 70;
     
     protected targetReached: boolean = false;
 
@@ -67,10 +68,7 @@ export class BaseEnemy extends SceneObject implements ISerializable {
             this.timeSinceLastUpdate += delta;
             if(this.timeSinceLastUpdate >= this.delayBetweenTargetUpdate) {
                 let closestTarget = this.enemyManager.getClosestTarget(this.transform.position);
-                if(closestTarget)
-                    this.target = closestTarget.position.clone();
-                else 
-                    this.target = undefined;
+                this.target = closestTarget;
             }
 
             this.moveToTarget(delta);
@@ -88,7 +86,14 @@ export class BaseEnemy extends SceneObject implements ISerializable {
     protected moveToTarget(delta: number): void {
         if(!this.target) return;
 
-        let dir = this.target.clone().subtract(this.transform.position);
+        const targetPos = this.target.position.clone();
+
+        let dir = targetPos.clone().subtract(this.transform.position).normalize().scale(this.distanceFromTarget);
+
+        const destination = targetPos.clone().subtract(dir);
+
+        dir = destination.clone().subtract(this.transform.position);
+
         const distance = dir.lengthSq();
 
         let targetForce = new Phaser.Math.Vector2(0,0);
