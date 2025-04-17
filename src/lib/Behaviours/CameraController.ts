@@ -25,7 +25,7 @@ export class CameraController extends Behaviour {
         this.cameraHeight = this.camera.height;
     }
 
-    onTick(): void {
+    onTick(_: number): void {
         if (!this.camera || !this.target) return;
 
         const minX = worldBounds.minX + this.cameraWidth / 2;

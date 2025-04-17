@@ -11,7 +11,7 @@ export abstract class Behaviour {
     onStart?(): void;
 
     // called every frame
-    onTick?(): void;
+    onTick?(delta: number): void;
 
     // called every frame after all onTick are called
     onLateTick?(): void;

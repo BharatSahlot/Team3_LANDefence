@@ -13,6 +13,7 @@ import { Map } from "../Map/Map";
 import { Game } from "../../scenes/Game";
 import { IOccupiable } from "../Map/IOccupiable";
 import { Tile } from "../Map/Tile";
+import { BasicGun } from "../Behaviours/BasicGun";
 
 export class Player extends SceneObject implements ISerializable, IOccupiable {
     public speed: number = 0.3;
@@ -44,12 +45,14 @@ export class Player extends SceneObject implements ISerializable, IOccupiable {
             Phaser.Math.Between(-250, 250),
             Phaser.Math.Between(-250, 250)
         );
-        this.position = this.transform.position;
+        this.position = this.transform.position.clone();
         this.transform.scale = new Phaser.Math.Vector2(2, 2);
         this.addBehaviour(this.transform);
 
         this.sprite = new SpriteRenderer(this, "gold-knight");
         this.addBehaviour(this.sprite);
+
+        this.addBehaviour(new BasicGun(this));
 
         const game = this.scene as Game;
         this.map = game.map;

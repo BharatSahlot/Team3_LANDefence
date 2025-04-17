@@ -28,6 +28,12 @@ const config: Types.Core.GameConfig = {
         keyboard: true,
         mouse: true,
     },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: false
+        }
+    },
 };
 
 export default new Game(config);

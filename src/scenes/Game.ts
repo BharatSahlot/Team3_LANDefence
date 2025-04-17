@@ -4,11 +4,9 @@ import { netMan } from '../lib/NetworkManager';
 import { gameEvents } from '../lib/GameEvents';
 import { Transform } from '../lib/Behaviours/Transform';
 import { ISerializable } from '../lib/ISerializable';
-import { SceneObject } from '../lib/SceneObject';
 import { BaseScene } from '../lib/BaseScene';
 import { BaseEnemy } from '../lib/Actors/BaseEnemy';
 import { Map as GameMap } from '../lib/Map/Map';
-import { TargetFlowField } from '../lib/Map/TargetFlowField';
 import { EnemyManager } from '../lib/EnemyManager';
 
 export class Game extends BaseScene
@@ -17,18 +15,20 @@ export class Game extends BaseScene
     private objectsStates: Map<string, ISerializable> = new Map<string, any>();
     private transforms: Map<string, Transform> = new Map<string, Transform>();
 
-    private objects: SceneObject[] = [];
     private players: Map<string, Player> = new Map<string, Player>();
 
     public map: GameMap;
 
     public enemyManager: EnemyManager;
 
+    public bulletsGroup: Phaser.Physics.Arcade.Group;
+    public enemiesGroup: Phaser.Physics.Arcade.Group;
+
     constructor ()
     {
         super('Game');
 
-        this.enemyManager = new EnemyManager();
+        this.enemyManager = new EnemyManager(this);
 
         this.map = new GameMap(1000, 1000, 16, -1400, -1400);
     }
@@ -41,6 +41,8 @@ export class Game extends BaseScene
             frameWidth: 16,
             frameHeight: 16
         });
+
+        this.load.image('arrow', './NinjaPack/Items/Projectile/Arrow.png');
 
         this.load.spritesheet('blue-bat', './NinjaPack/Actor/Monsters/BlueBat/SpriteSheet.png', {
             frameWidth: 16,
@@ -61,6 +63,16 @@ export class Game extends BaseScene
     create ()
     {
         super.create();
+
+        this.bulletsGroup = this.physics.add.group({
+            classType: Phaser.Physics.Arcade.Sprite,
+            runChildUpdate: true
+        });
+
+        this.enemiesGroup = this.physics.add.group({
+            classType: Phaser.Physics.Arcade.Sprite,
+            runChildUpdate: true
+        });
 
         this.setupPlayerAnimations();
 
@@ -114,7 +126,7 @@ export class Game extends BaseScene
             });
 
             let i = 0;
-            while(i < 300) {
+            while(i < 0) {
                 let enemy = new BaseEnemy(this, "blue-bat");
                 let transform = enemy.getComponent(Transform);
                 if(transform) {
@@ -183,9 +195,10 @@ export class Game extends BaseScene
     }
 
     override update(time: number, delta: number) {
-        this.objects.forEach(obj => obj.onTick(delta));
+        const objs = [...this.objects];
 
-        this.objects.forEach(obj => obj.onLateTick());
+        objs.forEach(obj => obj.onTick(delta));
+        objs.forEach(obj => obj.onLateTick());
     }
 
     private loadTilemap()

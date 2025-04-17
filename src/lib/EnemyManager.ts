@@ -1,4 +1,5 @@
 import { BaseEnemy } from "./Actors/BaseEnemy";
+import { BaseScene } from "./BaseScene";
 import { Transform } from "./Behaviours/Transform";
 import { Math as PhaserMath } from "phaser";
 
@@ -8,7 +9,11 @@ export class EnemyManager {
 
     public separationDistance: number = 32;
 
-    constructor() {}
+    private scene: BaseScene;
+
+    constructor(scene: BaseScene) {
+        this.scene = scene;
+    }
 
     public registerTarget(target: Transform): void {
         this.targets.push(target);

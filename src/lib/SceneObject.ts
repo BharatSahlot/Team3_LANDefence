@@ -71,7 +71,7 @@ export class SceneObject {
 
     public onTick(delta: number): void {
         this.behaviours.forEach(b => {
-            b.onTick?.();
+            b.onTick?.(delta);
         });
 
         this.newBehaviours.forEach(b => {
