@@ -14,8 +14,13 @@ export class KeyboardControls implements IControls {
         NUM2: scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
         NUM3: scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
         NUM4: scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR),
+        ESC: scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC), // For pausing the game
       };
       this.pointer = scene.input.activePointer;
+    }
+
+    isPausePressed(): boolean {
+      return Phaser.Input.Keyboard.JustDown(this.keys.ESC);
     }
   
     getMovement(): Phaser.Math.Vector2 {

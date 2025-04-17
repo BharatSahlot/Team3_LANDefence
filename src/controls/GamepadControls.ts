@@ -7,6 +7,13 @@ export class GamepadControls implements IControls {
     this.gamepad = scene.input.gamepad?.gamepads[0] || null;
   }
 
+  isPausePressed(): boolean {
+    if (this.gamepad) {
+        return this.gamepad.buttons[9]?.pressed ?? false; // 'Start' button 
+    }
+    return false;
+  }
+
   getMovement(): Phaser.Math.Vector2 {
     if (this.gamepad) {
       const leftStick = this.gamepad.leftStick;

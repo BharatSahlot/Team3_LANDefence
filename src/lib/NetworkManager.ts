@@ -170,6 +170,16 @@ export class NetworkManager {
         }
     }
 
+    public sendPauseState(isPaused: boolean) {
+        this.send({ type: 'pause-game', payload: isPaused });
+    }
+    
+    public setupPauseListener(onPause: (isPaused: boolean) => void) {
+        this.on('pause-game', (isPaused: boolean) => {
+            onPause(isPaused);
+        });
+    }
+
     public on(event: string, handler: NetworkEventHandler) {
         const handlers = this.eventHandlers.get(event) || [];
         handlers.push(handler);

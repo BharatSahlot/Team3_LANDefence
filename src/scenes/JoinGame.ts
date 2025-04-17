@@ -8,7 +8,6 @@ export class JoinGame extends Phaser.Scene {
     private inputWrapper!: HTMLDivElement;
     private playerListYStart = 200;
     private connected = false;
-
     private hostIdLabel: Phaser.GameObjects.GameObject;
 
     constructor() {

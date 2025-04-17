@@ -68,4 +68,8 @@ export class InputManager {
             return this.keyboardControls.getSelectedItemIndex(); // Keyboard uses numbers for selection
         }
     }
+
+    get isPausePressed(): boolean {
+        return (this.keyboardControls.isPausePressed() || this.gamepadControls?.isPausePressed()) ?? false;
+    }
 }
