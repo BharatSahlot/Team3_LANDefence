@@ -9,6 +9,7 @@ import { BaseScene } from '../lib/BaseScene';
 import { BaseEnemy } from '../lib/Actors/BaseEnemy';
 import { Map as GameMap } from '../lib/Map/Map';
 import { TargetFlowField } from '../lib/Map/TargetFlowField';
+import { EnemyManager } from '../lib/EnemyManager';
 
 export class Game extends BaseScene
 {
@@ -20,14 +21,16 @@ export class Game extends BaseScene
     private players: Map<string, Player> = new Map<string, Player>();
 
     public map: GameMap;
-    private targetFlowField: TargetFlowField;
+
+    public enemyManager: EnemyManager;
 
     constructor ()
     {
         super('Game');
 
+        this.enemyManager = new EnemyManager();
+
         this.map = new GameMap(1000, 1000, 16, -1400, -1400);
-        this.targetFlowField = new TargetFlowField(this.map);
     }
 
     preload ()
@@ -97,6 +100,8 @@ export class Game extends BaseScene
                 this.objectsStates.set(player.getId(), player);
                 this.objects.push(player);
 
+                this.enemyManager.registerTarget(player.transform);
+
                 player.onStart();
             });
 
@@ -109,7 +114,7 @@ export class Game extends BaseScene
             });
 
             let i = 0;
-            while(i < 1) {
+            while(i < 300) {
                 let enemy = new BaseEnemy(this, "blue-bat");
                 let transform = enemy.getComponent(Transform);
                 if(transform) {
@@ -118,6 +123,8 @@ export class Game extends BaseScene
 
                 this.objectsStates.set(enemy.getId(), enemy);
                 this.objects.push(enemy);
+
+                this.enemyManager.registerEnemy(enemy);
 
                 enemy.onStart();
                 i++;
@@ -176,10 +183,6 @@ export class Game extends BaseScene
     }
 
     override update(time: number, delta: number) {
-        if(netMan.isHosting()) {
-            this.targetFlowField.refresh(delta);
-        }
-
         this.objects.forEach(obj => obj.onTick(delta));
 
         this.objects.forEach(obj => obj.onLateTick());

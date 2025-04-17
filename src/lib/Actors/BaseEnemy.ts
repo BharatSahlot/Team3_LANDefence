@@ -1,4 +1,3 @@
-import { Math } from "phaser";
 import { BaseScene } from "../BaseScene";
 import { SpriteRenderer } from "../Behaviours/SpriteRenderer";
 import { Transform } from "../Behaviours/Transform";
@@ -7,12 +6,13 @@ import { netMan } from "../NetworkManager";
 import { SceneObject } from "../SceneObject";
 import { Map as GameMap } from "../Map/Map";
 import { Game } from "../../scenes/Game";
+import { EnemyManager } from "../EnemyManager";
 
 export class BaseEnemy extends SceneObject implements ISerializable {
     protected currentAnim = "idle";
 
     protected sprite: SpriteRenderer;
-    protected target = new Phaser.Math.Vector2(200, 200);
+    protected target: Phaser.Math.Vector2 | undefined = undefined;
 
     private spriteTag: string;
 
@@ -24,8 +24,12 @@ export class BaseEnemy extends SceneObject implements ISerializable {
 
     protected game!: Game;
     protected map!: GameMap;
+    protected enemyManager!: EnemyManager;
 
-    public delayBetweenTargetUpdate = 1000;
+    public delayBetweenTargetUpdate = 150;
+    private timeSinceLastUpdate = 0;
+
+    public randomSeparationForceMagnitude: number = 20;
 
     constructor(scene: BaseScene, sprite: string) {
         super(scene);
@@ -51,36 +55,62 @@ export class BaseEnemy extends SceneObject implements ISerializable {
 
         this.game = this.scene as Game;
         this.map = this.game.map;
+        this.enemyManager = this.game.enemyManager;
+
+        this.delayBetweenTargetUpdate += Math.random() * 100;
     }
 
     public onTick(delta: number): void {
         super.onTick(delta);
 
         if(netMan.isHosting()) {
-            const cTile = this.map.getTileAtWorldPos(this.transform.position.x, this.transform.position.y);
-            if(cTile?.nextTargetTile) {
-                console.log(cTile.nextTargetTile);
-                this.target.x = cTile.nextTargetTile.x;
-                this.target.y = cTile.nextTargetTile.y;
+            this.timeSinceLastUpdate += delta;
+            if(this.timeSinceLastUpdate >= this.delayBetweenTargetUpdate) {
+                let closestTarget = this.enemyManager.getClosestTarget(this.transform.position);
+                if(closestTarget)
+                    this.target = closestTarget.position.clone();
+                else 
+                    this.target = undefined;
             }
+
             this.moveToTarget(delta);
             this.playCorrectAnim();
         }
     }
 
+
+    protected getRandomSeparationForce(): Phaser.Math.Vector2 {
+        let randomX = Phaser.Math.FloatBetween(-1, 1);
+        let randomY = Phaser.Math.FloatBetween(-1, 1);
+        return new Phaser.Math.Vector2(randomX, randomY).normalize().scale(this.randomSeparationForceMagnitude);
+    }
+
     protected moveToTarget(delta: number): void {
-        const distance = this.transform.position.distance(this.target);
+        if(!this.target) return;
+
+        let dir = this.target.clone().subtract(this.transform.position);
+        const distance = dir.lengthSq();
+
+        let targetForce = new Phaser.Math.Vector2(0,0);
 
         if(distance > 1) {
-            let dir = this.target.subtract(this.transform.position).normalize();
-
-            let maxDist = this.speed * delta;
-            if(maxDist > distance) maxDist = distance;
-
-            let newPos = this.transform.position.add(dir.scale(maxDist));
-
-            this.transform.position = newPos;
+            dir = dir.normalize();
+            targetForce = dir;
         }
+
+        let randomForce = this.enemyManager.calculateSeparationForce(this);
+
+        // Combine target and random forces (adjust weights as needed)
+        let finalForce = targetForce.add(randomForce.scale(3)); // Adjust 0.5 to control separation strength
+
+        if(finalForce.lengthSq() > 0) {
+            finalForce = finalForce.normalize();
+        }
+
+        let maxDist = this.speed * delta;
+        let newPos = this.transform.position.add(finalForce.scale(maxDist));
+
+        this.transform.position = newPos;
     }
 
     protected playCorrectAnim(): void {
