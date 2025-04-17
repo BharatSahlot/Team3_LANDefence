@@ -104,6 +104,11 @@ export class NetworkManager {
         this.connections.set(conn.peer, conn);
 
         conn.on('data', (data) => {
+            if (data.type === 'update-player-list') {
+                this.playerList = data.payload; // Overwrite local copy
+                this.emit('update-player-list', this.playerList, conn.peer); // Let scenes update UI
+                return;
+            }
             if (data.type === 'select-class') {
                 const player = this.playerList.find(p => p.id === data.payload.playerId);
                 if (player) {
@@ -160,7 +165,8 @@ export class NetworkManager {
         const player = this.playerList.find(p => p.id === playerId);
         if (player) {
             player.className = className;
-            this.emit('update-player-list', this.playerList, this.peer.id); // 👈 Emit the updated list
+            this.emit('update-player-list', this.playerList, this.peer.id);
+            this.send({ type: 'update-player-list', payload: this.playerList });
         }
     }
 

@@ -185,16 +185,32 @@ export class JoinGame extends Phaser.Scene {
             image.on('pointerdown', () => {
                 popup.destroy();
     
-                // ✅ Send class selection to NetworkManager
-                netMan.selectClass(playerId, classKey); // 👈 This method you'll add to NetworkManager
-    
-                // ✅ Notify others
+                // Send class selection to NetworkManager
+                netMan.selectClass(playerId, classKey);
+                // Notify others
                 netMan.send({ type: 'select-class', payload: { playerId, className: classKey } });
             });
     
             classContainer.add([image, label]);
             popup.add(classContainer);
         });
+    
+        // Close Button
+        const closeButton = this.add.text(0, -90, 'Close', {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            color: '#ffffff',
+            backgroundColor: '#ff0000',
+            padding: { left: 10, right: 10, top: 5, bottom: 5 },
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    
+        closeButton.on('pointerdown', () => {
+            popup.destroy(); // Destroy the popup when clicked
+        });
+    
+        // Adjust the close button position relative to the popup
+        closeButton.setPosition(0, -90); // Above the popup
+        popup.add(closeButton);
     }
 
     private updatePlayerList(players: {id: string, className?: string}[]) {
