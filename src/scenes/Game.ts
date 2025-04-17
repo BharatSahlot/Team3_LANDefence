@@ -1,4 +1,4 @@
-import { setupPlayerAnimations } from './Game/setupPlayerAnimations';
+import { setupPlayerAnimations } from './Game/setupPlayerAnimations';'player-move'
 import { Player } from '../lib/Actors/Player';
 import { netMan } from '../lib/NetworkManager';
 import { gameEvents } from '../lib/GameEvents';
@@ -73,16 +73,19 @@ export class Game extends BaseScene
                 gameEvents.emit("transform-update", state);
             }, 5);
 
-            netMan.getPlayerList().forEach(playerId => {
-                let player = new Player(this, playerId != netMan.getPeerId());
-
+            netMan.getPlayerList().forEach(playerInfo => {
+                const { id: playerId, className } = playerInfo;
+            
+                // If Player constructor supports className, pass it
+                let player = new Player(this, playerId !== netMan.getPeerId(), className);
+            
                 player.peerId = playerId;
                 this.transforms.set(player.getId(), player.transform);
-
+            
                 this.players.set(playerId, player);
                 this.objectsStates.set(player.getId(), player);
                 this.objects.push(player);
-
+            
                 player.onStart();
             });
 

@@ -10,13 +10,13 @@ export class NetworkManager {
     private eventHandlers: Map<string, NetworkEventHandler[]> = new Map();
 
     private isHost = false;
-    private playerList: string[] = [];
+    private playerList: { id: string; className?: string }[] = [];
     private readonly MAX_PLAYERS = 4;
 
     constructor() {
     }
 
-    public getPlayerList(): string[] {
+    public getPlayerList(): { id: string; className?: string }[] {
         return this.playerList;
     }
 
@@ -36,7 +36,7 @@ export class NetworkManager {
             this.peer.on('open', (id) => {
                 console.log('Hosting as:', id);
 
-                this.playerList.push(id);
+                this.playerList.push({id});
                 this.emit('update-player-list', this.playerList, this.peer.id);
                 resolve(id);
             });
@@ -53,7 +53,7 @@ export class NetworkManager {
                 this.addConnection(conn);
                 this.emit('player-joined', { id: conn.peer }, conn.peer);
                 conn.on('open', () => {
-                    this.playerList.push(conn.peer);
+                    this.playerList.push({id: conn.peer});
                     this.emit('update-player-list', this.playerList, conn.peer);
                     this.send({ type: 'update-player-list', payload: this.playerList });
                 });
@@ -83,7 +83,7 @@ export class NetworkManager {
             this.peer.on('open', () => {
                 console.log("connected to peer server");
 
-                this.playerList.push(this.peer.id);
+                this.playerList.push({id: this.peer.id});
                 this.emit('update-player-list', this.playerList, this.peer.id);
 
                 const conn = this.peer.connect(hostId);
@@ -104,6 +104,14 @@ export class NetworkManager {
         this.connections.set(conn.peer, conn);
 
         conn.on('data', (data) => {
+            if (data.type === 'select-class') {
+                const player = this.playerList.find(p => p.id === data.payload.playerId);
+                if (player) {
+                    player.className = data.payload.className;
+                    this.send({ type: 'update-player-list', payload: this.playerList });
+                }
+                return;
+            }
             if (data.type === 'lobby-full') {
                 console.log("Received lobby-full from host");
                 this.emit('lobby-full', null, conn.peer);
@@ -119,7 +127,7 @@ export class NetworkManager {
 
             // ✅ If host, also remove from player list and notify others
             if (this.isHost) {
-                this.playerList = this.playerList.filter(id => id !== conn.peer);
+                this.playerList = this.playerList.filter(p => p.id !== conn.peer);
                 this.send({ type: 'update-player-list', payload: this.playerList });
                 this.emit('update-player-list', this.playerList, this.peer.id);
             }
@@ -142,6 +150,17 @@ export class NetworkManager {
             // Send to host
             const hostConn = Array.from(this.connections.values())[0];
             hostConn?.send(data);
+        }
+    }
+
+    public selectClass(playerId: string, className: string) {
+        // Only allow self-updates
+        if (playerId !== this.getPeerId()) return;
+    
+        const player = this.playerList.find(p => p.id === playerId);
+        if (player) {
+            player.className = className;
+            this.emit('update-player-list', this.playerList, this.peer.id); // 👈 Emit the updated list
         }
     }
 

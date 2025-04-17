@@ -10,6 +10,14 @@ export class HostGame extends Phaser.Scene {
         super('HostGame');
     }
 
+    preload() {
+        this.load.setPath('assets');
+        this.load.image('healer', './classes/healer.png');
+        this.load.image('attacker', './classes/attacker.png');
+        this.load.image('engineer', './classes/engineer.png');
+        this.load.image('tank', './classes/tank.png');
+    }
+
     create() {
         // Back to main menu button (top-right corner)
         const backButton = this.add.text(this.cameras.main.width - 30, 20, '← Back', {
@@ -76,17 +84,66 @@ export class HostGame extends Phaser.Scene {
         startButton.on('pointerout', () => startButton.setStyle({ backgroundColor: '#0077aa' }));
     }
 
-    private updatePlayerList(players: string[]) {
+    private showClassSelectionPopup(playerId: string) {
+        const popup = this.add.container(this.cameras.main.centerX, this.cameras.main.centerY);
+        const background = this.add.rectangle(0, 0, 500, 250, 0x000000, 0.9)
+            .setOrigin(0.5)
+            .setStrokeStyle(2, 0xffffff);
+        popup.add(background);
+    
+        const classes = ['healer', 'attacker', 'engineer', 'tank'];
+        const spacing = 110;
+    
+        classes.forEach((classKey, index) => {
+            const xOffset = (index - 1.5) * spacing;
+    
+            const classContainer = this.add.container(xOffset, 0);
+            console.log("Type of Class:", classKey);
+            const image = this.add.image(0, -30, classKey)
+                .setDisplaySize(64, 64)
+                .setInteractive({ useHandCursor: true });
+    
+            const label = this.add.text(0, 50, classKey.charAt(0).toUpperCase() + classKey.slice(1), {
+                fontFamily: 'Arial',
+                fontSize: '16px',
+                color: '#ffffff',
+            }).setOrigin(0.5);
+    
+            image.on('pointerdown', () => {
+                popup.destroy();
+    
+                // ✅ Send class selection to NetworkManager
+                netMan.selectClass(playerId, classKey); // 👈 This method you'll add to NetworkManager
+    
+                // ✅ Notify others
+                netMan.send({ type: 'select-class', payload: { playerId, className: classKey } });
+            });
+    
+            classContainer.add([image, label]);
+            popup.add(classContainer);
+        });
+    }
+
+    private updatePlayerList(players: {id: string, className?: string}[]) {
         // Remove previous text
         this.playerTexts.forEach(p => p.destroy());
         this.playerTexts = [];
 
-        players.forEach((name, i) => {
-            const text = this.add.text(100, this.playerListYStart + i * 40, name, {
+        players.forEach((player, i) => {
+            const displayText = player.className ? `${player.id} - ${player.className}` : player.id;
+            const text = this.add.text(100, this.playerListYStart + i * 40, displayText, {
                 fontFamily: 'Courier',
                 fontSize: '20px',
                 color: '#ffffff',
+            }).setInteractive({ useHandCursor: true });
+        
+            text.on('pointerdown', () => {
+                // Only allow the local player to update their own class
+                if (player.id === netMan.getPeerId()) {
+                    this.showClassSelectionPopup(player.id);
+                }
             });
+        
             this.playerTexts.push(text);
         });
     }
