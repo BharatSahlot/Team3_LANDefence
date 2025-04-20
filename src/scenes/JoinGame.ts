@@ -9,83 +9,75 @@ export class JoinGame extends Phaser.Scene {
     private playerListYStart = 200;
     private connected = false;
 
-    private hostIdLabel: Phaser.GameObjects.GameObject;
+    private hostIdLabel!: Phaser.GameObjects.Text;
 
     constructor() {
         super('JoinGame');
     }
 
+    preload() {
+        this.load.image('bg', 'public/assets/bg_1.jpeg');
+        this.load.image('logo', 'public/assets/logo_1.png');
+        this.load.image('bk', 'public/assets/bk.png');
+        this.load.image('jg', 'public/assets/jg.png');
+    }
+
     create() {
-        // Back to main menu button (top-right corner)
-        const backButton = this.add.text(this.cameras.main.width - 30, 20, '← Back', {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#ffffff',
-            backgroundColor: '#333',
-            padding: { left: 10, right: 10, top: 5, bottom: 5 },
-        })
-        .setOrigin(1, 0)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => {
-            this.inputWrapper?.remove();  // Clean up input
-            this.scene.start('MainMenu');
-        });
+        const { width, height, centerX, centerY } = this.cameras.main;
+        const margin = 20;
 
-        const centerX = this.cameras.main.centerX;
+        // Top Logo
+        const logo = this.add.image(centerX, margin + 80, 'logo')
+            .setOrigin(0.5)
+            .setScale(0.3);
 
-        // Title
-        this.add.text(centerX, 60, 'Join Game Game', {
-            fontFamily: 'Arial',
-            fontSize: '48px',
-            color: '#ffffff',
-        }).setOrigin(0.5);
+        // Back Button
+        const backButton = this.add.image(margin + 80, margin + 40, 'bk')
+            .setOrigin(0.5)
+            .setScale(0.2)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.removeInput();
+                this.scene.start('MainMenu');
+            });
 
-        // Create HTML input box
-        this.createInput(centerX);
-
-        // Instruction
-        this.hostIdLabel = this.add.text(centerX, 130, 'Enter Host ID:', {
+        // Title or label for host input
+        this.hostIdLabel = this.add.text(centerX, centerY - 100, 'Enter Host ID:', {
             fontFamily: 'Arial',
             fontSize: '24px',
             color: '#ffffff',
         }).setOrigin(0.5);
 
-        // Set listener for receiving updated player list
+        // Create the HTML input box for entering Host ID.
+        this.createInput(centerX, centerY);
+
+        // Listen for network events
         netMan.on('update-player-list', (players: string[]) => {
             console.log(players);
             this.updatePlayerList(players);
         });
 
         netMan.on('lobby-full', () => {
-            this.inputWrapper?.remove();
-            this.showLobbyFullMessage();
-            setTimeout(() => {
-                netMan.reset();
-                window.location.reload();
-            }, 2000);
+            this.removeInput();
+            this.scene.start('MainMenu');
+            alert('Lobby is full');
+        });
+
+        // Clean up input elements on scene shutdown/destroy
+        this.events.on('shutdown', () => {
+            this.removeInput();
+        });
+        this.events.on('destroy', () => {
+            this.removeInput();
         });
     }
 
-    private showLobbyFullMessage() {
-        const message = this.add.text(this.cameras.main.centerX, 300, 'Lobby is full. Please try another Host ID.', {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            color: '#ff5555',
-            backgroundColor: '#000000',
-            padding: { x: 10, y: 5 }
-        }).setOrigin(0.5);
-    
-        setTimeout(() => {
-            message.destroy();
-            this.createInput(this.cameras.main.centerX);
-        }, 2000);
-    }
-
-    private createInput(x: number) {
+    private createInput(x: number, y: number) {
         this.inputWrapper = document.createElement('div');
+        // Position the wrapper absolutely using scene coordinates
         this.inputWrapper.style.position = 'absolute';
-        this.inputWrapper.style.left = `${x - 100}px`;
-        this.inputWrapper.style.top = '160px';
+        this.inputWrapper.style.left = `${x + 100}px`;
+        this.inputWrapper.style.top = `${y}px`;
 
         this.inputBox = document.createElement('input');
         this.inputBox.type = 'text';
@@ -94,20 +86,11 @@ export class JoinGame extends Phaser.Scene {
         this.inputBox.style.fontSize = '20px';
         this.inputBox.style.padding = '5px';
 
-        // this.inputBox.addEventListener('keydown', (e) => {
-        //     if (e.key === 'Enter') {
-        //         this.connectToHost(this.inputBox.value);
-        //     }
-        // });
-
-        const centerX = this.cameras.main.centerX;
-        const joinButton = this.add.text(centerX, 600, 'Join Game', {
-            fontFamily: 'Arial',
-            fontSize: '32px',
-            color: '#ffffff',
-            backgroundColor: '#0077aa',
-            padding: { x: 20, y: 10 },
-        }).setOrigin(0.5).setInteractive();
+        // Create join button (as a Phaser Image) to initiate the connection.
+        const joinButton = this.add.image(x - 20, y * 1.5, 'jg')
+            .setOrigin(0.5)
+            .setScale(0.5)
+            .setInteractive();
 
         joinButton.on('pointerdown', () => {
             joinButton.destroy();
@@ -122,6 +105,12 @@ export class JoinGame extends Phaser.Scene {
         document.body.appendChild(this.inputWrapper);
     }
 
+    private removeInput() {
+        if (this.inputWrapper && this.inputWrapper.parentElement) {
+            this.inputWrapper.remove();
+        }
+    }
+
     private connectToHost(hostId: string) {
         if (this.connected) return;
 
@@ -129,7 +118,7 @@ export class JoinGame extends Phaser.Scene {
 
         netMan.once('connected-to-host', () => {
             this.connected = true;
-            this.inputWrapper.remove();
+            this.removeInput();
             this.hostIdLabel.destroy();
 
             window.addEventListener('beforeunload', () => {
@@ -165,10 +154,10 @@ export class JoinGame extends Phaser.Scene {
     }
 
     shutdown() {
-        this.inputWrapper?.remove();
+        this.removeInput();
     }
 
     destroy() {
-        this.shutdown();
+        this.removeInput();
     }
 }

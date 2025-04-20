@@ -3,6 +3,7 @@ import { AUTO, Game, Scale,Types } from 'phaser';
 import { MainMenu } from './scenes/MainMenu';
 import { HostGame } from './scenes/HostGame';
 import { JoinGame } from './scenes/JoinGame';
+import { Settings } from './scenes/Settings';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -21,13 +22,15 @@ const config: Types.Core.GameConfig = {
         MainMenu,
         HostGame,
         JoinGame,
-        MainGame
+        MainGame,
+        Settings
     ],
     input: {
         gamepad: true,
         keyboard: true,
         mouse: true,
     },
+    dom: { createContainer: true },
 };
 
 export default new Game(config);
