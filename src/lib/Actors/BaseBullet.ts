@@ -1,4 +1,3 @@
-import { Game } from "../../scenes/Game";
 import { BaseScene } from "../BaseScene";
 import { PhysicsSprite } from "../Behaviours/PhysicsSprite";
 import { Transform } from "../Behaviours/Transform";
@@ -12,7 +11,7 @@ export class BaseBullet extends SceneObject {
     protected transform: Transform;
     protected sprite: PhysicsSprite;
 
-    public speed = 0.6;
+    public speed = 0.2;
 
     constructor(scene: BaseScene) {
         super(scene);
@@ -20,9 +19,7 @@ export class BaseBullet extends SceneObject {
         this.transform = new Transform(this);
         this.addBehaviour(this.transform);
 
-        const game = scene as Game;
-
-        this.sprite = new PhysicsSprite(this, 'arrow', game.bulletsGroup);
+        this.sprite = new PhysicsSprite(this, 'arrow', "bullet");
         this.addBehaviour(this.sprite);
     }
 

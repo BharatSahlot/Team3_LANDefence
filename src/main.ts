@@ -31,7 +31,8 @@ const config: Types.Core.GameConfig = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false
+            // debug: true,
+            customUpdate: true,
         }
     },
 };

@@ -1,10 +1,12 @@
 import { Scene } from "phaser";
 import { InputManager } from "../controls/InputManager";
 import { SceneObject } from "./SceneObject";
+import { PhysicsManager } from "./PhysicsManager";
 
 export class BaseScene extends Scene
 {
     public inputManager: InputManager;
+    public physicsManager: PhysicsManager;
 
     protected objects: SceneObject[] = [];
 
@@ -14,6 +16,7 @@ export class BaseScene extends Scene
 
     create() {
         this.inputManager = new InputManager(this);
+        this.physicsManager = new PhysicsManager(this);
     }
 
     public addObjectToScene(obj: SceneObject) {

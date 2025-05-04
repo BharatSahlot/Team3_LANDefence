@@ -7,11 +7,12 @@ import { SceneObject } from "../SceneObject";
 import { Map as GameMap } from "../Map/Map";
 import { Game } from "../../scenes/Game";
 import { EnemyManager } from "../EnemyManager";
+import { PhysicsSprite } from "../Behaviours/PhysicsSprite";
 
 export class BaseEnemy extends SceneObject implements ISerializable {
     protected currentAnim = "idle";
 
-    protected sprite: SpriteRenderer;
+    protected sprite: PhysicsSprite;
     protected target: Phaser.Math.Vector2 | undefined = undefined;
 
     private spriteTag: string;
@@ -50,8 +51,12 @@ export class BaseEnemy extends SceneObject implements ISerializable {
         this.addBehaviour(this.transform);
 
         this.spriteTag = sprite;
-        this.sprite = new SpriteRenderer(this, sprite);
+        this.sprite = new PhysicsSprite(this, sprite, "enemy");
         this.addBehaviour(this.sprite);
+
+        this.sprite.onCollisionCB = (_) => {
+            this.getScene().removeObjectFromScene(this);
+        };
 
         this.game = this.scene as Game;
         this.map = this.game.map;
@@ -107,8 +112,10 @@ export class BaseEnemy extends SceneObject implements ISerializable {
             finalForce = finalForce.normalize();
         }
 
+        // this.sprite.setVelocity(finalForce.x, finalForce.y);
+
         let maxDist = this.speed * delta;
-        let newPos = this.transform.position.add(finalForce.scale(maxDist));
+        let newPos = this.transform.position.clone().add(finalForce.scale(maxDist));
 
         this.transform.position = newPos;
     }
@@ -132,7 +139,7 @@ export class BaseEnemy extends SceneObject implements ISerializable {
         if(this.spriteTag != data.sprite) {
             if(this.sprite) this.sprite.onDestroy();
 
-            this.sprite = new SpriteRenderer(this, data.sprite);
+            this.sprite = new PhysicsSprite(this, data.sprite, "enemy");
         }
         this.currentAnim = data.anim;
     }

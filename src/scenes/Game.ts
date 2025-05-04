@@ -21,9 +21,6 @@ export class Game extends BaseScene
 
     public enemyManager: EnemyManager;
 
-    public bulletsGroup: Phaser.Physics.Arcade.Group;
-    public enemiesGroup: Phaser.Physics.Arcade.Group;
-
     constructor ()
     {
         super('Game');
@@ -35,6 +32,8 @@ export class Game extends BaseScene
 
     preload ()
     {
+        this.physics.world.defaults.debugShowVelocity = true;
+
         this.load.setPath('assets');
 
         this.load.spritesheet('gold-knight', './NinjaPack/Actor/Characters/KnightGold/SpriteSheet.png', {
@@ -63,16 +62,6 @@ export class Game extends BaseScene
     create ()
     {
         super.create();
-
-        this.bulletsGroup = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Sprite,
-            runChildUpdate: true
-        });
-
-        this.enemiesGroup = this.physics.add.group({
-            classType: Phaser.Physics.Arcade.Sprite,
-            runChildUpdate: true
-        });
 
         this.setupPlayerAnimations();
 
@@ -126,7 +115,7 @@ export class Game extends BaseScene
             });
 
             let i = 0;
-            while(i < 0) {
+            while(i < 200) {
                 let enemy = new BaseEnemy(this, "blue-bat");
                 let transform = enemy.getComponent(Transform);
                 if(transform) {
@@ -199,6 +188,8 @@ export class Game extends BaseScene
 
         objs.forEach(obj => obj.onTick(delta));
         objs.forEach(obj => obj.onLateTick());
+
+        this.physics.world.update(time, delta);
     }
 
     private loadTilemap()
