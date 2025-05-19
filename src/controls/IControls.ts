@@ -4,4 +4,5 @@ export interface IControls {
     getPointerAim(): Phaser.Math.Vector2;
     isUseItemPressed(): boolean;
     getSelectedItemIndex(): number;
+    isPausePressed(): boolean;
   }

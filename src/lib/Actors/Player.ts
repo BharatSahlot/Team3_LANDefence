@@ -26,9 +26,12 @@ export class Player extends SceneObject implements ISerializable, IOccupiable {
     private currentSpeed: Phaser.Math.Vector2;
     private isNetworkControlled: boolean = false;
 
+    public className: string = 'Default';
+
     private position: Phaser.Math.Vector2 = new Phaser.Math.Vector2(0, 0);
 
     public peerId: string;
+    constructor(scene: BaseScene, isNetworkControlled: boolean = false, className?: string) {
 
     private map: Map;
 
@@ -50,6 +53,7 @@ export class Player extends SceneObject implements ISerializable, IOccupiable {
 
         this.sprite = new SpriteRenderer(this, "gold-knight");
         this.addBehaviour(this.sprite);
+        this.className = className || 'Default'; // Default fallback
 
         const game = this.scene as Game;
         this.map = game.map;
@@ -84,6 +88,22 @@ export class Player extends SceneObject implements ISerializable, IOccupiable {
 
     public onTick(delta: number): void {
         this.currentSpeed = this.scene.inputManager?.movement.clone();
+
+        if(this.currentSpeed.x < 0){
+            this.sprite.anims!.play('left', true);
+        } 
+        if(this.currentSpeed.x > 0) {
+            this.sprite.anims!.play('right', true);
+        } 
+        if(this.currentSpeed.y < 0) {
+            this.sprite.anims!.play('up', true);
+        } 
+        if(this.currentSpeed.y > 0) {
+            this.sprite.anims!.play('down', true);
+        }
+        if(this.currentSpeed.x == 0 && this.currentSpeed.y == 0) {
+            this.sprite.anims!.stop();
+        }
 
         if(!this.isNetworkControlled) {
             this.transform.position.x += this.currentSpeed.x * this.speed * delta;
