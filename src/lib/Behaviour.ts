@@ -1,7 +1,7 @@
 import { SceneObject } from "./SceneObject";
 
 export abstract class Behaviour {
-    protected object: SceneObject;
+    public object: SceneObject;
 
     constructor(object: SceneObject) {
         this.object = object;

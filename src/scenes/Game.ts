@@ -6,6 +6,10 @@ import { Transform } from '../lib/Behaviours/Transform';
 import { ISerializable } from '../lib/ISerializable';
 import { SceneObject } from '../lib/SceneObject';
 import { BaseScene } from '../lib/BaseScene';
+import { BaseEnemy } from '../lib/Actors/BaseEnemy';
+import { Map as GameMap } from '../lib/Map/Map';
+import { TargetFlowField } from '../lib/Map/TargetFlowField';
+import { EnemyManager } from '../lib/EnemyManager';
 
 export class Game extends BaseScene
 {
@@ -16,9 +20,17 @@ export class Game extends BaseScene
     private objects: SceneObject[] = [];
     private players: Map<string, Player> = new Map<string, Player>();
 
+    public map: GameMap;
+
+    public enemyManager: EnemyManager;
+
     constructor ()
     {
         super('Game');
+
+        this.enemyManager = new EnemyManager();
+
+        this.map = new GameMap(1000, 1000, 16, -1400, -1400);
     }
 
     preload ()
@@ -26,6 +38,11 @@ export class Game extends BaseScene
         this.load.setPath('assets');
 
         this.load.spritesheet('gold-knight', './NinjaPack/Actor/Characters/KnightGold/SpriteSheet.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
+        this.load.spritesheet('blue-bat', './NinjaPack/Actor/Monsters/BlueBat/SpriteSheet.png', {
             frameWidth: 16,
             frameHeight: 16
         });
@@ -85,7 +102,7 @@ export class Game extends BaseScene
                 this.players.set(playerId, player);
                 this.objectsStates.set(player.getId(), player);
                 this.objects.push(player);
-            
+                this.enemyManager.registerTarget(player.transform);
                 player.onStart();
             });
 
@@ -96,6 +113,23 @@ export class Game extends BaseScene
                 player.transform.position.x = data.x;
                 player.transform.position.y = data.y;
             });
+
+            let i = 0;
+            while(i < 1) {
+                let enemy = new BaseEnemy(this, "blue-bat");
+                let transform = enemy.getComponent(Transform);
+                if(transform) {
+                    this.transforms.set(enemy.getId(), transform);
+                }
+
+                this.objectsStates.set(enemy.getId(), enemy);
+                this.objects.push(enemy);
+
+                this.enemyManager.registerEnemy(enemy);
+
+                enemy.onStart();
+                i++;
+            }
 
         } else {
             // peer side
@@ -119,6 +153,16 @@ export class Game extends BaseScene
 
                             this.objects.push(player);
                             player.onStart();
+                        } else if(data[id].type == 'BaseEnemy') {
+                            let enemy = new BaseEnemy(this, "blue-bat");
+                            enemy.setId(id);
+                            enemy.deserialize(data[id].data);
+
+                            this.transforms.set(id, enemy.transform);
+                            this.objectsStates.set(id, enemy);
+                            this.objects.push(enemy);
+
+                            enemy.onStart();
                         }
                     }
                 }
